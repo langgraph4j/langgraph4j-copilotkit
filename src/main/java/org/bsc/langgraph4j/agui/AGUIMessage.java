@@ -1,9 +1,6 @@
-package org.bsc.langgraph4j.ag_ui;
+package org.bsc.langgraph4j.agui;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.*;
 
 import java.util.List;
 import java.util.Objects;
@@ -11,6 +8,7 @@ import java.util.Objects;
 /**
  * Base interface for all AG-UI messages, facilitating polymorphic deserialization.
  */
+@JsonIgnoreProperties(ignoreUnknown = true) // Add this annotation
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.EXISTING_PROPERTY, // Use existing 'role' property for dispatch

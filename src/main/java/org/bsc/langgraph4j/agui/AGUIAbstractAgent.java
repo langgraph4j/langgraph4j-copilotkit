@@ -1,4 +1,4 @@
-package org.bsc.langgraph4j.ag_ui;
+package org.bsc.langgraph4j.agui;
 
 import reactor.core.publisher.Flux;
 

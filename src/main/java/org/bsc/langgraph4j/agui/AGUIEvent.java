@@ -1,4 +1,4 @@
-package org.bsc.langgraph4j.ag_ui;
+package org.bsc.langgraph4j.agui;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -356,7 +356,7 @@ public interface AGUIEvent {
     ) implements AGUIEvent {
         public RunStartedEvent {
             Objects.requireNonNull(threadId, "threadId cannot be null");
-            Objects.requireNonNull(runId, "runId cannot be null");
+            // Objects.requireNonNull(runId, "runId cannot be null");
             if (type != EventType.RUN_STARTED) {
                 throw new IllegalArgumentException("Type must be RUN_STARTED");
             }
@@ -376,7 +376,7 @@ public interface AGUIEvent {
     ) implements AGUIEvent {
         public RunFinishedEvent {
             Objects.requireNonNull(threadId, "threadId cannot be null");
-            Objects.requireNonNull(runId, "runId cannot be null");
+            // Objects.requireNonNull(runId, "runId cannot be null");
             if (type != EventType.RUN_FINISHED) {
                 throw new IllegalArgumentException("Type must be RUN_FINISHED");
             }

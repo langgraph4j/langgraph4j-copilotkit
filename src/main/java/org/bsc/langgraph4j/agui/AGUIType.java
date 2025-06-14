@@ -1,4 +1,4 @@
-package org.bsc.langgraph4j.ag_ui;
+package org.bsc.langgraph4j.agui;
 
 import com.fasterxml.jackson.annotation.*;
 
@@ -70,6 +70,7 @@ public interface AGUIType {
      * Input for running an agent.
      * Corresponds to Zod: {@code RunAgentInputSchema}
      */
+    @JsonIgnoreProperties(ignoreUnknown = true) // Add this annotation
     @JsonInclude(JsonInclude.Include.NON_NULL)
     record RunAgentInput(
             @JsonProperty("threadId") String threadId,
@@ -82,11 +83,11 @@ public interface AGUIType {
     ) {
         public RunAgentInput {
             Objects.requireNonNull(threadId, "threadId cannot be null");
-            Objects.requireNonNull(runId, "runId cannot be null");
+            //Objects.requireNonNull(runId, "runId cannot be null");
             // state can be null/any
             Objects.requireNonNull(messages, "messages cannot be null");
-            Objects.requireNonNull(tools, "tools cannot be null");
-            Objects.requireNonNull(context, "context cannot be null");
+            //Objects.requireNonNull(tools, "tools cannot be null");
+            //Objects.requireNonNull(context, "context cannot be null");
             // forwardedProps can be null/any
         }
     }
