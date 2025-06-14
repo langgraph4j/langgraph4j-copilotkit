@@ -1,6 +1,6 @@
 # Langgraph4j support for CopilotKit
 
-Make [Langgraph4j] copliant with [AG-UI] protocol with [CopilotKit] integration
+Make [Langgraph4j] copliant with [AG-UI protocol][AG-UI] with [CopilotKit] integration
 
 
 
