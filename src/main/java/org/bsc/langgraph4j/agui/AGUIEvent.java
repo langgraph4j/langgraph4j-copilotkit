@@ -23,7 +23,6 @@ import java.util.Objects;
         @JsonSubTypes.Type(value = AGUIEvent.TextMessageStartEvent.class, name = "TEXT_MESSAGE_START"),
         @JsonSubTypes.Type(value = AGUIEvent.TextMessageContentEvent.class, name = "TEXT_MESSAGE_CONTENT"),
         @JsonSubTypes.Type(value = AGUIEvent.TextMessageEndEvent.class, name = "TEXT_MESSAGE_END"),
-        @JsonSubTypes.Type(value = AGUIEvent.TextMessageChunkEvent.class, name = "TEXT_MESSAGE_CHUNK"),
         @JsonSubTypes.Type(value = AGUIEvent.ToolCallStartEvent.class, name = "TOOL_CALL_START"),
         @JsonSubTypes.Type(value = AGUIEvent.ToolCallArgsEvent.class, name = "TOOL_CALL_ARGS"),
         @JsonSubTypes.Type(value = AGUIEvent.ToolCallEndEvent.class, name = "TOOL_CALL_END"),
@@ -143,28 +142,6 @@ public interface AGUIEvent {
         }
         public TextMessageEndEvent(String messageId) {
             this(EventType.TEXT_MESSAGE_END, System.currentTimeMillis(), null, messageId);
-        }
-    }
-
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    record TextMessageChunkEvent(
-            @JsonProperty("type") EventType type,
-            @JsonProperty("timestamp") Long timestamp,
-            @JsonProperty("raw_event") Object rawEvent,
-            @JsonProperty("message_id") String messageId, // Optional
-            @JsonProperty("role") String role,           // Optional
-            @JsonProperty("delta") String delta          // Optional
-    ) implements AGUIEvent {
-        public TextMessageChunkEvent {
-            if (type != EventType.TEXT_MESSAGE_CHUNK) {
-                throw new IllegalArgumentException("Type must be TEXT_MESSAGE_CHUNK");
-            }
-            if (role != null && !ASSISTANT_ROLE.equals(role)) {
-                throw new IllegalArgumentException("Role, if present, must be 'assistant'");
-            }
-        }
-        public TextMessageChunkEvent(String messageId, String role, String delta) {
-            this(EventType.TEXT_MESSAGE_CHUNK, System.currentTimeMillis(), null, messageId, role, delta);
         }
     }
 
