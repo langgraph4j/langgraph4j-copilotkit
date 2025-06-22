@@ -2,7 +2,7 @@ package org.bsc.langgraph4j.agui;
 
 import reactor.core.publisher.Flux;
 
-public class SampleAgent implements AGUIAbstractAgent {
+public class AGUISampleAgent implements AGUIAgent {
 
     @Override
     public Flux<? extends AGUIEvent> run(AGUIType.RunAgentInput input) {

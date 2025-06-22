@@ -8,8 +8,9 @@ import org.springframework.context.annotation.Bean;
 public class AGUIApplication {
 
 	@Bean
-	SampleAgent createAgent() {
-		return new SampleAgent();
+    AGUIAgent createAgent() {
+		//return new AGUISampleAgent();
+		return new AGUIAgentExecutor();
 	}
 
 	public static void main(String[] args) {
