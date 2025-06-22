@@ -119,17 +119,19 @@ class Langgraph4jAdapter implements CopilotServiceAdapter {
               if (m) {
                 try {
                   messages.push(JSON.parse(m[1]));
-                  
+                  buffer = ''; // Clear buffer
                 } catch (error) {
                   buffer = lastLine; // Keep the last line in buffer for next iteration
                   console.warn("fetch is incomplete. LastLine :", lastLine);
                 }
               }
-              buffer = ''; // Clear buffer
+            }
+            else {
+              buffer = ''; // Clear buffer if no last line
             }
 
+            console.debug(`${threadId} - Fetched messages:`, messages);
             for (const message of messages) {
-
               switch (message.type) {
                 case 'RUN_STARTED':
                   break;
@@ -162,11 +164,10 @@ class Langgraph4jAdapter implements CopilotServiceAdapter {
 
           }
         } finally {
+           console.debug("Processing messages completed:", threadId);
           eventStream$.complete();
         }
       });
-
-      console.debug("FETCHED EVENTS");
 
     } catch (error: any) {
       if ("name" in error && error.name === 'AbortError') {
@@ -190,7 +191,7 @@ export const POST = async (req: NextRequest) => {
   const { handleRequest } = copilotRuntimeNextJSAppRouterEndpoint({
     runtime,
     serviceAdapter,
-    endpoint: "/api/copilotkit",
+    endpoint: "/api/langgraph4j",
   });
 
   return handleRequest(req);
