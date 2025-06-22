@@ -13,10 +13,10 @@ import java.time.LocalTime;
 @RequestMapping("/langgraph4j")
 public class AGUISSEController {
 
-    final AGUIAbstractAgent uiAgent;
+    final AGUIAgent uiAgent;
     final ObjectMapper mapper = new ObjectMapper();
 
-    public AGUISSEController(AGUIAbstractAgent uiAgent) {
+    public AGUISSEController(AGUIAgent uiAgent) {
         this.uiAgent = uiAgent;
     }
 
