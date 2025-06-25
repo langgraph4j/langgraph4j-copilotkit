@@ -18,17 +18,20 @@ import org.springframework.ai.tool.annotation.ToolParam;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
+
+import static java.util.Optional.ofNullable;
 
 public class AGUIAgentExecutor extends AGUILangGraphAgent {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AGUIAgentExecutor.class);
 
     enum AiModel {
 
-        OPENAI_GPT_4O_MINI(
+        OPENAI_GPT_4O_MINI( () ->
                 OpenAiChatModel.builder()
                         .openAiApi(OpenAiApi.builder()
                                 .baseUrl("https://api.openai.com")
-                                .apiKey(System.getenv("OPENAI_API_KEY"))
+                                .apiKey( System.getenv("OPENAI_API_KEY"))
                                 .build())
                         .defaultOptions(OpenAiChatOptions.builder()
                                 .model("gpt-4o-mini")
@@ -36,7 +39,7 @@ public class AGUIAgentExecutor extends AGUILangGraphAgent {
                                 .temperature(0.1)
                                 .build())
                         .build()),
-        OLLAMA_QWEN2_5_7B(
+        OLLAMA_QWEN2_5_7B( () ->
                 OllamaChatModel.builder()
                         .ollamaApi( OllamaApi.builder().baseUrl("http://localhost:11434").build() )
                         .defaultOptions(OllamaOptions.builder()
@@ -46,9 +49,9 @@ public class AGUIAgentExecutor extends AGUILangGraphAgent {
                         .build());
         ;
 
-        public final ChatModel model;
+        public final Supplier<ChatModel> model;
 
-        AiModel(  ChatModel model ) {
+        AiModel(  Supplier<ChatModel> model ) {
             this.model = model;
         }
     }
@@ -68,8 +71,13 @@ public class AGUIAgentExecutor extends AGUILangGraphAgent {
 
     @Override
     StateGraph<? extends AgentState> buildStateGraph() throws GraphStateException {
+
+        var model = ofNullable(System.getenv("OPENAI_API_KEY"))
+                .map( key -> AiModel.OPENAI_GPT_4O_MINI.model.get())
+                .orElseGet(AiModel.OLLAMA_QWEN2_5_7B.model);
+
         return AgentExecutor.builder()
-                .streamingChatModel(AiModel.OLLAMA_QWEN2_5_7B.model)
+                .streamingChatModel(model)
                 .toolsFromObject(new WeatherTool())
                 .build();
     }
