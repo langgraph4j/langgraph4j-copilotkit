@@ -30,7 +30,6 @@ import java.util.Objects;
         @JsonSubTypes.Type(value = AGUIEvent.StateSnapshotEvent.class, name = "STATE_SNAPSHOT"),
         @JsonSubTypes.Type(value = AGUIEvent.StateDeltaEvent.class, name = "STATE_DELTA"),
         @JsonSubTypes.Type(value = AGUIEvent.MessagesSnapshotEvent.class, name = "MESSAGES_SNAPSHOT"),
-        @JsonSubTypes.Type(value = AGUIEvent.RawEvent.class, name = "RAW"),
         @JsonSubTypes.Type(value = AGUIEvent.CustomEvent.class, name = "CUSTOM"),
         @JsonSubTypes.Type(value = AGUIEvent.RunStartedEvent.class, name = "RUN_STARTED"),
         @JsonSubTypes.Type(value = AGUIEvent.RunFinishedEvent.class, name = "RUN_FINISHED"),
@@ -46,8 +45,8 @@ public interface AGUIEvent {
     @JsonProperty("timestamp")
     Long timestamp(); // Optional, maps to Python's Optional[int]
 
-    @JsonProperty("raw_event")
-    Object rawEvent(); // Optional, maps to Python's Optional[Any]
+//    @JsonProperty("raw_event")
+//    Object rawEvent(); // Optional, maps to Python's Optional[Any]
 
     /**
      * Defines the event types for the Agent User Interaction Protocol.
@@ -85,7 +84,7 @@ public interface AGUIEvent {
     record TextMessageStartEvent(
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
-            @JsonProperty("raw_event") Object rawEvent,
+            //@JsonProperty("raw_event") Object rawEvent,
             @JsonProperty("message_id") String messageId,
             @JsonProperty("role") String role
     ) implements AGUIEvent {
@@ -100,7 +99,7 @@ public interface AGUIEvent {
             }
         }
         public TextMessageStartEvent(String messageId) {
-            this(EventType.TEXT_MESSAGE_START, System.currentTimeMillis(), null, messageId, ASSISTANT_ROLE);
+            this(EventType.TEXT_MESSAGE_START, System.currentTimeMillis(), messageId, ASSISTANT_ROLE);
         }
     }
 
@@ -108,7 +107,7 @@ public interface AGUIEvent {
     record TextMessageContentEvent(
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
-            @JsonProperty("raw_event") Object rawEvent,
+            //@JsonProperty("raw_event") Object rawEvent,
             @JsonProperty("message_id") String messageId,
             @JsonProperty("delta") String delta
     ) implements AGUIEvent {
@@ -123,7 +122,7 @@ public interface AGUIEvent {
             }
         }
         public TextMessageContentEvent(String messageId, String delta) {
-            this(EventType.TEXT_MESSAGE_CONTENT, System.currentTimeMillis(), null, messageId, delta);
+            this(EventType.TEXT_MESSAGE_CONTENT, System.currentTimeMillis(), messageId, delta);
         }
     }
 
@@ -131,7 +130,7 @@ public interface AGUIEvent {
     record TextMessageEndEvent(
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
-            @JsonProperty("raw_event") Object rawEvent,
+            //@JsonProperty("raw_event") Object rawEvent,
             @JsonProperty("message_id") String messageId
     ) implements AGUIEvent {
         public TextMessageEndEvent {
@@ -141,7 +140,7 @@ public interface AGUIEvent {
             }
         }
         public TextMessageEndEvent(String messageId) {
-            this(EventType.TEXT_MESSAGE_END, System.currentTimeMillis(), null, messageId);
+            this(EventType.TEXT_MESSAGE_END, System.currentTimeMillis(), messageId);
         }
     }
 
@@ -149,7 +148,7 @@ public interface AGUIEvent {
     record ToolCallStartEvent(
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
-            @JsonProperty("raw_event") Object rawEvent,
+            //@JsonProperty("raw_event") Object rawEvent,
             @JsonProperty("tool_call_id") String toolCallId,
             @JsonProperty("tool_call_name") String toolCallName,
             @JsonProperty("parent_message_id") String parentMessageId // Optional
@@ -162,7 +161,7 @@ public interface AGUIEvent {
             }
         }
         public ToolCallStartEvent(String toolCallId, String toolCallName, String parentMessageId) {
-            this(EventType.TOOL_CALL_START, System.currentTimeMillis(), null, toolCallId, toolCallName, parentMessageId);
+            this(EventType.TOOL_CALL_START, System.currentTimeMillis(), toolCallId, toolCallName, parentMessageId);
         }
     }
 
@@ -170,19 +169,19 @@ public interface AGUIEvent {
     record ToolCallArgsEvent(
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
-            @JsonProperty("raw_event") Object rawEvent,
+            //@JsonProperty("raw_event") Object rawEvent,
             @JsonProperty("tool_call_id") String toolCallId,
-            @JsonProperty("delta") String delta
+            @JsonProperty("tool_call_args") String args
     ) implements AGUIEvent {
         public ToolCallArgsEvent {
             Objects.requireNonNull(toolCallId, "toolCallId cannot be null");
-            Objects.requireNonNull(delta, "delta cannot be null");
+            Objects.requireNonNull(args, "delta cannot be null");
             if (type != EventType.TOOL_CALL_ARGS) {
                 throw new IllegalArgumentException("Type must be TOOL_CALL_ARGS");
             }
         }
-        public ToolCallArgsEvent(String toolCallId, String delta) {
-            this(EventType.TOOL_CALL_ARGS, System.currentTimeMillis(), null, toolCallId, delta);
+        public ToolCallArgsEvent(String toolCallId, String args) {
+            this(EventType.TOOL_CALL_ARGS, System.currentTimeMillis(), toolCallId, args);
         }
     }
 
@@ -190,7 +189,7 @@ public interface AGUIEvent {
     record ToolCallEndEvent(
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
-            @JsonProperty("raw_event") Object rawEvent,
+            //@JsonProperty("raw_event") Object rawEvent,
             @JsonProperty("tool_call_id") String toolCallId
     ) implements AGUIEvent {
         public ToolCallEndEvent {
@@ -200,7 +199,7 @@ public interface AGUIEvent {
             }
         }
         public ToolCallEndEvent(String toolCallId) {
-            this(EventType.TOOL_CALL_END, System.currentTimeMillis(), null, toolCallId);
+            this(EventType.TOOL_CALL_END, System.currentTimeMillis(), toolCallId);
         }
     }
 
@@ -208,7 +207,7 @@ public interface AGUIEvent {
     record ToolCallChunkEvent(
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
-            @JsonProperty("raw_event") Object rawEvent,
+            //@JsonProperty("raw_event") Object rawEvent,
             @JsonProperty("tool_call_id") String toolCallId,         // Optional
             @JsonProperty("tool_call_name") String toolCallName,     // Optional
             @JsonProperty("parent_message_id") String parentMessageId, // Optional
@@ -220,7 +219,7 @@ public interface AGUIEvent {
             }
         }
         public ToolCallChunkEvent(String toolCallId, String toolCallName, String parentMessageId, String delta) {
-            this(EventType.TOOL_CALL_CHUNK, System.currentTimeMillis(), null, toolCallId, toolCallName, parentMessageId, delta);
+            this(EventType.TOOL_CALL_CHUNK, System.currentTimeMillis(), toolCallId, toolCallName, parentMessageId, delta);
         }
     }
 
@@ -228,7 +227,7 @@ public interface AGUIEvent {
     record StateSnapshotEvent(
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
-            @JsonProperty("raw_event") Object rawEvent,
+            //@JsonProperty("raw_event") Object rawEvent,
             @JsonProperty("snapshot") State snapshot
     ) implements AGUIEvent {
         public StateSnapshotEvent {
@@ -238,7 +237,7 @@ public interface AGUIEvent {
             }
         }
         public StateSnapshotEvent(State snapshot) {
-            this(EventType.STATE_SNAPSHOT, System.currentTimeMillis(), null, snapshot);
+            this(EventType.STATE_SNAPSHOT, System.currentTimeMillis(), snapshot);
         }
     }
 
@@ -246,7 +245,7 @@ public interface AGUIEvent {
     record StateDeltaEvent(
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
-            @JsonProperty("raw_event") Object rawEvent,
+            //@JsonProperty("raw_event") Object rawEvent,
             @JsonProperty("delta") List<Object> delta // Represents JSON Patch operations
     ) implements AGUIEvent {
         public StateDeltaEvent {
@@ -256,7 +255,7 @@ public interface AGUIEvent {
             }
         }
         public StateDeltaEvent(List<Object> delta) {
-            this(EventType.STATE_DELTA, System.currentTimeMillis(), null, delta);
+            this(EventType.STATE_DELTA, System.currentTimeMillis(), delta);
         }
     }
 
@@ -264,7 +263,7 @@ public interface AGUIEvent {
     record MessagesSnapshotEvent(
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
-            @JsonProperty("raw_event") Object rawEvent,
+            //@JsonProperty("raw_event") Object rawEvent,
             @JsonProperty("messages") List<Message> messages
     ) implements AGUIEvent {
         public MessagesSnapshotEvent {
@@ -274,31 +273,7 @@ public interface AGUIEvent {
             }
         }
         public MessagesSnapshotEvent(List<Message> messages) {
-            this(EventType.MESSAGES_SNAPSHOT, System.currentTimeMillis(), null, messages);
-        }
-    }
-
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    record RawEvent(
-            @JsonProperty("type") EventType type,
-            @JsonProperty("timestamp") Long timestamp,
-            @JsonProperty("raw_event") Object rawEvent, // This is the base raw_event
-            @JsonProperty("event") Object event,       // This is the specific 'event' field for RawEvent
-            @JsonProperty("source") String source      // Optional
-    ) implements AGUIEvent {
-        public RawEvent {
-            Objects.requireNonNull(event, "event cannot be null for RawEvent");
-            if (type != EventType.RAW) {
-                throw new IllegalArgumentException("Type must be RAW");
-            }
-        }
-        // Constructor for when base raw_event is not the same as this event's data
-        public RawEvent(Object baseRawEventData, Object specificEventData, String source) {
-            this(EventType.RAW, System.currentTimeMillis(), baseRawEventData, specificEventData, source);
-        }
-        // Constructor when this event's data is also the base raw_event
-        public RawEvent(Object eventData, String source) {
-            this(EventType.RAW, System.currentTimeMillis(), eventData, eventData, source);
+            this(EventType.MESSAGES_SNAPSHOT, System.currentTimeMillis(), messages);
         }
     }
 
@@ -306,7 +281,7 @@ public interface AGUIEvent {
     record CustomEvent(
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
-            @JsonProperty("raw_event") Object rawEvent,
+            //@JsonProperty("raw_event") Object rawEvent,
             @JsonProperty("name") String name,
             @JsonProperty("value") Object value
     ) implements AGUIEvent {
@@ -319,7 +294,7 @@ public interface AGUIEvent {
             }
         }
         public CustomEvent(String name, Object value) {
-            this(EventType.CUSTOM, System.currentTimeMillis(), null, name, value);
+            this(EventType.CUSTOM, System.currentTimeMillis(), name, value);
         }
     }
 
@@ -327,7 +302,7 @@ public interface AGUIEvent {
     record RunStartedEvent(
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
-            @JsonProperty("raw_event") Object rawEvent,
+            //@JsonProperty("raw_event") Object rawEvent,
             @JsonProperty("thread_id") String threadId,
             @JsonProperty("run_id") String runId
     ) implements AGUIEvent {
@@ -339,7 +314,7 @@ public interface AGUIEvent {
             }
         }
         public RunStartedEvent(String threadId, String runId) {
-            this(EventType.RUN_STARTED, System.currentTimeMillis(), null, threadId, runId);
+            this(EventType.RUN_STARTED, System.currentTimeMillis(), threadId, runId);
         }
     }
 
@@ -347,7 +322,7 @@ public interface AGUIEvent {
     record RunFinishedEvent(
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
-            @JsonProperty("raw_event") Object rawEvent,
+            //@JsonProperty("raw_event") Object rawEvent,
             @JsonProperty("thread_id") String threadId,
             @JsonProperty("run_id") String runId
     ) implements AGUIEvent {
@@ -359,7 +334,7 @@ public interface AGUIEvent {
             }
         }
         public RunFinishedEvent(String threadId, String runId) {
-            this(EventType.RUN_FINISHED, System.currentTimeMillis(), null, threadId, runId);
+            this(EventType.RUN_FINISHED, System.currentTimeMillis(), threadId, runId);
         }
     }
 
@@ -367,7 +342,7 @@ public interface AGUIEvent {
     record RunErrorEvent(
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
-            @JsonProperty("raw_event") Object rawEvent,
+            //@JsonProperty("raw_event") Object rawEvent,
             @JsonProperty("message") String message,
             @JsonProperty("code") String code // Optional
     ) implements AGUIEvent {
@@ -378,7 +353,7 @@ public interface AGUIEvent {
             }
         }
         public RunErrorEvent(String message, String code) {
-            this(EventType.RUN_ERROR, System.currentTimeMillis(), null, message, code);
+            this(EventType.RUN_ERROR, System.currentTimeMillis(), message, code);
         }
     }
 
@@ -386,7 +361,7 @@ public interface AGUIEvent {
     record StepStartedEvent(
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
-            @JsonProperty("raw_event") Object rawEvent,
+            //@JsonProperty("raw_event") Object rawEvent,
             @JsonProperty("step_name") String stepName
     ) implements AGUIEvent {
         public StepStartedEvent {
@@ -396,7 +371,7 @@ public interface AGUIEvent {
             }
         }
         public StepStartedEvent(String stepName) {
-            this(EventType.STEP_STARTED, System.currentTimeMillis(), null, stepName);
+            this(EventType.STEP_STARTED, System.currentTimeMillis(), stepName);
         }
     }
 
@@ -404,7 +379,7 @@ public interface AGUIEvent {
     record StepFinishedEvent(
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
-            @JsonProperty("raw_event") Object rawEvent,
+            //@JsonProperty("raw_event") Object rawEvent,
             @JsonProperty("step_name") String stepName
     ) implements AGUIEvent {
         public StepFinishedEvent {
@@ -414,7 +389,7 @@ public interface AGUIEvent {
             }
         }
         public StepFinishedEvent(String stepName) {
-            this(EventType.STEP_FINISHED, System.currentTimeMillis(), null, stepName);
+            this(EventType.STEP_FINISHED, System.currentTimeMillis(), stepName);
         }
     }
 }
