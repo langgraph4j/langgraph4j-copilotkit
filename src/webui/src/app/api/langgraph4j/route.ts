@@ -46,8 +46,27 @@ interface RunFinished extends BaseMessage {
   thread_id: string;
 }
 
+interface ToolCallStart extends BaseMessage {
+  type: 'TOOL_CALL_START';
+  tool_call_id: string;
+  tool_call_name: string; // Name of the tool being called
+  parent_message_id?: string; // ID of the parent message that initiated the tool call
+}
+
+// Interface for TOOL_CALL_END
+interface ToolCallEnd extends BaseMessage {
+  type: 'TOOL_CALL_END';
+  tool_call_id: string;
+}
+
+interface ToolCallArgs extends BaseMessage {
+  type: 'TOOL_CALL_ARGS';
+  tool_call_id: string;
+  tool_call_args: string; // Arguments passed to the tool
+}
+
 // Union type for all possible message types
-type Message = RunStarted | TextMessageStart | TextMessageContent | TextMessageEnd | RunFinished;
+type Message = RunStarted | TextMessageStart | TextMessageContent | TextMessageEnd | RunFinished | ToolCallStart | ToolCallEnd | ToolCallArgs;
 
 class Langgraph4jAdapter implements CopilotServiceAdapter {
   private abortController: AbortController;
@@ -59,6 +78,8 @@ class Langgraph4jAdapter implements CopilotServiceAdapter {
 
   async process(request: CopilotRuntimeChatCompletionRequest): Promise<CopilotRuntimeChatCompletionResponse> {
 
+    console.debug( "Processing request:", request );
+    
     const {
       threadId: threadIdFromRequest,
       eventSource,
@@ -77,6 +98,7 @@ class Langgraph4jAdapter implements CopilotServiceAdapter {
 
       });
 
+      
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -130,10 +152,12 @@ class Langgraph4jAdapter implements CopilotServiceAdapter {
               buffer = ''; // Clear buffer if no last line
             }
 
+            
             console.debug(`${threadId} - Fetched messages:`, messages);
             for (const message of messages) {
               switch (message.type) {
                 case 'RUN_STARTED':
+                  
                   break;
                 case 'TEXT_MESSAGE_START':
                   eventStream$.sendTextMessageStart({
@@ -154,6 +178,25 @@ class Langgraph4jAdapter implements CopilotServiceAdapter {
                 case 'RUN_FINISHED':
                   fetchEvents = false;
                   break;
+                case 'TOOL_CALL_START':
+                  eventStream$.sendActionExecutionStart({
+                    actionExecutionId: message.tool_call_id,
+                    actionName: message.tool_call_name,
+                    parentMessageId: message.parent_message_id,
+                  });
+                  break;
+                case 'TOOL_CALL_ARGS':
+                  eventStream$.sendActionExecutionArgs({
+                    actionExecutionId: message.tool_call_id,
+                    args: message.tool_call_args,
+                  });
+                  break;
+                case 'TOOL_CALL_END':
+                  eventStream$.sendActionExecutionEnd({
+                    actionExecutionId: message.tool_call_id,
+                  });
+                  fetchEvents = false;
+                  break;
                 default:
                   // Handle unexpected message types
                   console.error('Unexpected message type:', message);
@@ -165,7 +208,7 @@ class Langgraph4jAdapter implements CopilotServiceAdapter {
           }
         } finally {
            console.debug("Processing messages completed:", threadId);
-          eventStream$.complete();
+           eventStream$.complete();
         }
       });
 
@@ -188,6 +231,7 @@ const serviceAdapter = new Langgraph4jAdapter();
 const runtime = new CopilotRuntime({});
 
 export const POST = async (req: NextRequest) => {
+
   const { handleRequest } = copilotRuntimeNextJSAppRouterEndpoint({
     runtime,
     serviceAdapter,
