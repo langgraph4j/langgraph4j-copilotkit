@@ -3,14 +3,14 @@ import org.bsc.langgraph4j.CompileConfig;
 import org.bsc.langgraph4j.GraphStateException;
 import org.bsc.langgraph4j.RunnableConfig;
 import org.bsc.langgraph4j.StateGraph;
+import org.bsc.langgraph4j.action.InterruptionMetadata;
+import org.bsc.langgraph4j.agent.AgentEx;
 import org.bsc.langgraph4j.checkpoint.BaseCheckpointSaver;
-import org.bsc.langgraph4j.checkpoint.Checkpoint;
 import org.bsc.langgraph4j.state.AgentState;
 import org.bsc.langgraph4j.streaming.StreamingOutput;
 import org.bsc.langgraph4j.utils.TryConsumer;
 import org.bsc.langgraph4j.utils.TryFunction;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
 
 import java.util.List;
 import java.util.Map;
@@ -21,23 +21,21 @@ import static java.util.Objects.requireNonNull;
 
 public abstract class AGUILangGraphAgent implements AGUIAgent {
     public record GraphData( StateGraph<? extends AgentState> stateGraph,
-                             CompileConfig compileConfig,
                              boolean interruption)
     {
         public GraphData {
             requireNonNull( stateGraph, "stateGraph cannot ne bull");
-            requireNonNull( compileConfig, "compileConfig cannot ne bull");
         }
 
-        public GraphData( StateGraph<? extends AgentState> stateGraph, CompileConfig compileConfig) {
-            this(stateGraph, compileConfig, false);
+        public GraphData( StateGraph<? extends AgentState> stateGraph) {
+            this(stateGraph, false);
         }
 
         public GraphData withInterruption( boolean interrupt ) {
             if( this.interruption == interrupt ) {
                 return this;
             }
-            return new GraphData(stateGraph, compileConfig, interrupt);
+            return new GraphData(stateGraph, interrupt);
         }
      }
 
@@ -63,7 +61,7 @@ public abstract class AGUILangGraphAgent implements AGUIAgent {
 
     abstract Map<String,Object> buildGraphInput( AGUIType.RunAgentInput input );
 
-    abstract List<Approval> onInterruption(AGUIType.RunAgentInput input, Checkpoint lastCheckpoint, FluxSink<AGUIEvent> emitter );
+    abstract <State extends AgentState> List<Approval> onInterruption(AGUIType.RunAgentInput input, InterruptionMetadata<State> state );
 
     @Override
     public final Flux<? extends AGUIEvent> run(AGUIType.RunAgentInput input) {
@@ -73,7 +71,7 @@ public abstract class AGUILangGraphAgent implements AGUIAgent {
         return Flux.create( emitter -> {
             try {
 
-                var compileConfig = CompileConfig.builder(graphData.compileConfig())
+                var compileConfig = CompileConfig.builder()
                         .checkpointSaver(saver)
                         .build();
 
@@ -86,13 +84,27 @@ public abstract class AGUILangGraphAgent implements AGUIAgent {
 
                 var messageId = String.valueOf(System.currentTimeMillis());
 
-                final var runnableConfig = RunnableConfig.builder()
+                var runnableConfig = RunnableConfig.builder()
                         .threadId(input.threadId())
                         .build();
 
                 var isEmittingChunk = new AtomicBoolean(false);
 
-                final Map<String,Object> graphInput = graphData.interruption() ? null : buildGraphInput(input);
+                final Map<String,Object> graphInput ;
+
+                if( graphData.interruption() ) {
+
+                    var lastResultMessage = input.lastResultMessage()
+                                    .map(AGUIMessage.ResultMessage::result)
+                                    .orElseThrow( () -> new IllegalStateException( "last result message not found after interruption") );
+
+                    runnableConfig = agent.updateState( runnableConfig, Map.of(AgentEx.APPROVAL_RESULT_PROPERTY, lastResultMessage ));
+
+                    graphInput = null; // resume graph
+                }
+                else {
+                    graphInput = buildGraphInput(input);
+                }
 
                 agent.stream( graphInput, runnableConfig )
                         .async()
@@ -128,17 +140,14 @@ public abstract class AGUILangGraphAgent implements AGUIAgent {
                         }).thenAccept( TryConsumer.Try(result -> {
                             log.trace( "COMPLETE:\n{}", result);
 
-                            if( result instanceof String interruptedNode ) {
 
-                                var lastCheckpoint = saver.list( runnableConfig ).stream()
-                                        .findFirst()
-                                        .orElseThrow();
+                            if( result instanceof InterruptionMetadata<?> interruptionMetadata ) {
 
-                                log.trace( "INTERRUPTION on node {} LAST CHECKPOINT:\n{}",interruptedNode, lastCheckpoint );
+                                log.trace( "INTERRUPTION DETECTED: {}",interruptionMetadata );
 
                                 graphByThread.put(input.threadId(), graphData.withInterruption(true));
 
-                                onInterruption(input, lastCheckpoint, emitter).forEach( approval -> {
+                                onInterruption(input, interruptionMetadata).forEach( approval -> {
                                     emitter.next( new AGUIEvent.ToolCallStartEvent(
                                             approval.toolId(),
                                             approval.toolName(),
