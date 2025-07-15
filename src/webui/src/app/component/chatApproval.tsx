@@ -35,10 +35,10 @@ export function SimpleChatWithApproval() {
               Send email to <b></b> with subject "<b></b>"?
             </p>
             <div className="mt-4 flex gap-2">
-              <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={() => respond?.(true) }>
+              <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={() => respond?.('APPROVED') }>
                 Approve
               </button>
-              <button className="bg-blue-300 px-4 py-2 rounded" onClick={() => respond?.(false)}>
+              <button className="bg-blue-300 px-4 py-2 rounded" onClick={() => respond?.('REJECTED')}>
                 Cancel
               </button>
             </div>
