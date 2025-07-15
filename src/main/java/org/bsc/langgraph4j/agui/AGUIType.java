@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.*;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public interface AGUIType {
 
@@ -89,6 +90,22 @@ public interface AGUIType {
             //Objects.requireNonNull(tools, "tools cannot be null");
             //Objects.requireNonNull(context, "context cannot be null");
             // forwardedProps can be null/any
+        }
+
+         public Optional<AGUIMessage.TextMessage> lastUserMessage() {
+            return messages().stream()
+                    .filter( m -> m instanceof AGUIMessage.TextMessage )
+                    .map(AGUIMessage.TextMessage.class::cast)
+                    .filter(AGUIMessage.HasRole::isUser)
+                    .reduce((first, second) -> second);
+
+        }
+
+        public Optional<AGUIMessage.ResultMessage> lastResultMessage() {
+            return messages().stream()
+                    .filter( m -> m instanceof AGUIMessage.ResultMessage )
+                    .map(AGUIMessage.ResultMessage.class::cast)
+                    .reduce((first, second) -> second);
         }
     }
 
