@@ -1,12 +1,12 @@
 package org.bsc.langgraph4j.agui;
 
-import org.bsc.langgraph4j.CompileConfig;
 import org.bsc.langgraph4j.GraphRepresentation;
 import org.bsc.langgraph4j.GraphStateException;
-import org.bsc.langgraph4j.checkpoint.Checkpoint;
+import org.bsc.langgraph4j.action.InterruptionMetadata;
 import org.bsc.langgraph4j.checkpoint.MemorySaver;
 import org.bsc.langgraph4j.spring.ai.agentexecutor.AgentExecutorEx;
 import org.bsc.langgraph4j.spring.ai.util.MessageUtil;
+import org.bsc.langgraph4j.state.AgentState;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
@@ -19,11 +19,11 @@ import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
-import reactor.core.publisher.FluxSink;
 
 import java.util.*;
 import java.util.function.Supplier;
 
+import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 import static org.bsc.langgraph4j.utils.CollectionsUtils.lastOf;
 
@@ -51,7 +51,15 @@ public class AGUIAgentExecutor extends AGUILangGraphAgent {
                                 .model("qwen2.5:7b")
                                 .temperature(0.1)
                                 .build())
-                        .build());
+                        .build()),
+        OLLAMA_QWEN3_14B( () ->
+                OllamaChatModel.builder()
+                .ollamaApi( OllamaApi.builder().baseUrl("http://localhost:11434").build() )
+                .defaultOptions(OllamaOptions.builder()
+                                .model("qwen3:14b")
+                                .temperature(0.1)
+                                .build())
+                .build());
         ;
 
         public final Supplier<ChatModel> model;
@@ -70,7 +78,7 @@ public class AGUIAgentExecutor extends AGUILangGraphAgent {
                 @ToolParam( description = "body of the email") String body
         ) {
             // This is a placeholder for the actual implementation
-            return "mail sent";
+            return format("mail sent to %s with subject %s", to, subject);
         }
 
         @Tool( description = "Get the weather in location")
@@ -92,37 +100,39 @@ public class AGUIAgentExecutor extends AGUILangGraphAgent {
                 .orElseGet(AiModel.OLLAMA_QWEN2_5_7B.model);
 
         var agent =  AgentExecutorEx.builder()
-                .streamingChatModel(model)
+                .chatModel(model, true)
                 .toolsFromObject(new Tools())
+                .approvalOn( "sendEmail",
+                         (nodeId, state ) ->
+                                        InterruptionMetadata.builder( nodeId, state )
+                                        .build()
+                )
                 .build();
 
         log.info( "REPRESENTATION:\n{}",
                 agent.getGraph(GraphRepresentation.Type.PLANTUML, "Agent Executor", false).content()
         );
 
-        return new GraphData( agent, CompileConfig.builder()
-                .interruptBefore("sendEmail")
-                .build() ) ;
+        return new GraphData( agent ) ;
     }
 
     @Override
     Map<String, Object> buildGraphInput(AGUIType.RunAgentInput input) {
-        var lastUserMessage = input.messages().stream()
-                .filter( m -> m instanceof AGUIMessage.TextMessage )
-                .map(AGUIMessage.TextMessage.class::cast)
-                .filter(AGUIMessage.HasRole::isUser)
-                .reduce((first, second) -> second)
+
+        var lastUserMessage = input.lastUserMessage()
                 .map(AGUIMessage.TextMessage::content)
-                .orElseThrow();
+                .orElseThrow( () -> new IllegalStateException("last user message not found"));
+
+        log.debug( "LAST USER MESSAGE: {}", lastUserMessage );
 
         return Map.of("messages", new UserMessage(lastUserMessage));
     }
 
     @Override
-    List<Approval> onInterruption(AGUIType.RunAgentInput input, Checkpoint lastCheckpoint, FluxSink<AGUIEvent> emitter) {
+    <State extends AgentState> List<Approval> onInterruption(AGUIType.RunAgentInput input, InterruptionMetadata<State> state ) {
 
-        @SuppressWarnings("unchecked")
-        var messages = (List<Message>)lastCheckpoint.getState().get("messages");
+        var messages = state.state().<List<Message>>value("messages")
+                .orElseThrow( () -> new IllegalStateException("messages not found into given state"));
 
         return lastOf(messages)
                 .flatMap(MessageUtil::asAssistantMessage)
