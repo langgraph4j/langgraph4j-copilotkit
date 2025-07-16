@@ -48,7 +48,7 @@ export function SimpleChatWithApproval() {
       }
      return <></>
   }});
-  <CopilotChat />
+  // <CopilotChat />
 
   return (
     <CopilotChat
@@ -57,6 +57,7 @@ export function SimpleChatWithApproval() {
         title: "Your Assistant",
         initial: "Hi! 👋 How can I assist you today?",
       }}
+      className="w-full"
     />
   );
 
