@@ -28,22 +28,23 @@ export function SimpleChatWithApproval() {
       }
       if (status === "executing") {
         return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white text-black p-6 rounded shadow-lg">
-            <h2 className="text-lg font-bold mb-2">Confirm Email</h2>
-            <p>
-              Send email to <b></b> with subject "<b></b>"?
-            </p>
-            <div className="mt-4 flex gap-2">
+            <div className="fixed inset-0 flex items-center justify-center z-50">
+            <div className="bg-white text-black p-6 rounded shadow-lg border border-black">
+              <h2 className="text-lg font-bold mb-2">Confirm Email</h2>
+              <p>
+              Send email to <b>{args.arg0}</b> with subject "<b>{args.arg1}</b>"?
+              </p>
+              <p><i>{args.arg2}</i></p>
+              <div className="mt-4 flex gap-2">
               <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={() => respond?.('APPROVED') }>
                 Approve
               </button>
               <button className="bg-blue-300 px-4 py-2 rounded" onClick={() => respond?.('REJECTED')}>
                 Cancel
               </button>
+              </div>
             </div>
-          </div>
-        </div>
+            </div>
       );
       }
      return <></>
