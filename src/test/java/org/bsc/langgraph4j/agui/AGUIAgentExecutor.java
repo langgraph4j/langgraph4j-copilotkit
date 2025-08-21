@@ -44,6 +44,18 @@ public class AGUIAgentExecutor extends AGUILangGraphAgent {
                                 .temperature(0.1)
                                 .build())
                         .build()),
+        GITHUB_MODELS_GPT_4O_MINI( () ->
+                OpenAiChatModel.builder()
+                        .openAiApi(OpenAiApi.builder()
+                                .baseUrl("https://models.github.ai/inference") // GITHUB MODELS
+                                .apiKey(System.getenv("GITHUB_MODELS_TOKEN"))
+                                .build())
+                        .defaultOptions(OpenAiChatOptions.builder()
+                                .model("gpt-4o-mini")
+                                .logprobs(false)
+                                .temperature(0.1)
+                                .build())
+                        .build()),
         OLLAMA_QWEN2_5_7B( () ->
                 OllamaChatModel.builder()
                         .ollamaApi( OllamaApi.builder().baseUrl("http://localhost:11434").build() )
@@ -97,7 +109,10 @@ public class AGUIAgentExecutor extends AGUILangGraphAgent {
 
         var model = ofNullable(System.getenv("OPENAI_API_KEY"))
                 .map( key -> AiModel.OPENAI_GPT_4O_MINI.model.get())
-                .orElseGet(AiModel.OLLAMA_QWEN2_5_7B.model);
+                .orElseGet( () ->
+                    ofNullable( System.getenv("GITHUB_MODELS_TOKEN") )
+                            .map( key -> AiModel.GITHUB_MODELS_GPT_4O_MINI.model.get() )
+                            .orElseGet( AiModel.OLLAMA_QWEN2_5_7B.model ));
 
         var agent =  AgentExecutorEx.builder()
                 .chatModel(model, true)
