@@ -116,7 +116,8 @@ public abstract class AGUILangGraphAgent implements AGUIAgent {
                                     log.trace( "STREAMING START");
                                     emitter.next(new AGUIEvent.TextMessageStartEvent(messageId));
                                 }
-                                if( output.chunk().isEmpty()) {
+
+                                if( output.chunk() == null || output.chunk().isEmpty()) {
                                     log.trace( "STREAMING CHUNK IS EMPTY");
                                 }
                                 else {
