@@ -40,13 +40,13 @@ flowchart LR
 ```
 ## Getting Started
 
-### start LangGraph4j Agent**
+### start LangGraph4j Agent
 
 ```bash
 mvn package spring-boot:test-run
 ```
 
-### start CopilotKit App**
+### start CopilotKit App
 
 ```bash
 cd webui
