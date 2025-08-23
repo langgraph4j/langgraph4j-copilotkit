@@ -40,20 +40,20 @@ flowchart LR
 ```
 ## Getting Started
 
-### start LangGraph4j Agent
+### Start LangGraph4j Agent
 
 ```bash
 mvn package spring-boot:test-run
 ```
 
-### start CopilotKit App
+### Start CopilotKit App
 
 ```bash
 cd webui
 npm run dev
 ```
 
-### open app
+### Open web app
 
 Open browser on [http://localhost:3000](http://localhost:3000) and play with chat
 
