@@ -57,9 +57,13 @@ npm run dev
 
 Open browser on [http://localhost:3000](http://localhost:3000) and play with chat
 
-![chat](chat.png)
+### Demo 
 
+![demo](demo.gif)
 
+## References
+
+* [LangGraph4j Meets AG-UI - Building UI/UX in the AI Agents era](https://bsorrentino.github.io/bsorrentino/ai/2025/08/21/LangGraph4j-meets-AG-UI.html)
 
 
 [AG-UI]: https://docs.ag-ui.com/introduction
