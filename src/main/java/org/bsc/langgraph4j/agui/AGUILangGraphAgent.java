@@ -57,11 +57,11 @@ public abstract class AGUILangGraphAgent implements AGUIAgent {
         this.saver = saver;
     }
 
-    abstract GraphData buildStateGraph() throws GraphStateException;
+    protected abstract GraphData buildStateGraph() throws GraphStateException;
 
-    abstract Map<String,Object> buildGraphInput( AGUIType.RunAgentInput input );
+    protected abstract Map<String,Object> buildGraphInput( AGUIType.RunAgentInput input );
 
-    abstract <State extends AgentState> List<Approval> onInterruption(AGUIType.RunAgentInput input, InterruptionMetadata<State> state );
+    protected abstract <State extends AgentState> List<Approval> onInterruption(AGUIType.RunAgentInput input, InterruptionMetadata<State> state );
 
     @Override
     public final Flux<? extends AGUIEvent> run(AGUIType.RunAgentInput input) {
