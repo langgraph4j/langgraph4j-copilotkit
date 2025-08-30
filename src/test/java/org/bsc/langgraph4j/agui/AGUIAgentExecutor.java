@@ -1,5 +1,6 @@
 package org.bsc.langgraph4j.agui;
 
+import org.bsc.langgraph4j.CompileConfig;
 import org.bsc.langgraph4j.GraphRepresentation;
 import org.bsc.langgraph4j.GraphStateException;
 import org.bsc.langgraph4j.action.InterruptionMetadata;
@@ -102,9 +103,9 @@ public class AGUIAgentExecutor extends AGUILangGraphAgent {
         }
     }
 
-    public AGUIAgentExecutor() {
-        super(new MemorySaver());
-    }
+    private final MemorySaver saver = new MemorySaver();
+
+    public AGUIAgentExecutor() {}
 
     @Override
     protected GraphData buildStateGraph() throws GraphStateException {
@@ -130,7 +131,9 @@ public class AGUIAgentExecutor extends AGUILangGraphAgent {
                 agent.getGraph(GraphRepresentation.Type.PLANTUML, "Agent Executor", false).content()
         );
 
-        return new GraphData( agent ) ;
+        var compileConfig = CompileConfig.builder().checkpointSaver(saver).build();
+
+        return new GraphData( agent.compile(compileConfig) ) ;
     }
 
     @Override

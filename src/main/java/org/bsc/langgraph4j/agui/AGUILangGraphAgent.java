@@ -1,11 +1,7 @@
 package org.bsc.langgraph4j.agui;
-import org.bsc.langgraph4j.CompileConfig;
-import org.bsc.langgraph4j.GraphStateException;
-import org.bsc.langgraph4j.RunnableConfig;
-import org.bsc.langgraph4j.StateGraph;
+import org.bsc.langgraph4j.*;
 import org.bsc.langgraph4j.action.InterruptionMetadata;
 import org.bsc.langgraph4j.agent.AgentEx;
-import org.bsc.langgraph4j.checkpoint.BaseCheckpointSaver;
 import org.bsc.langgraph4j.state.AgentState;
 import org.bsc.langgraph4j.streaming.StreamingOutput;
 import org.bsc.langgraph4j.utils.TryConsumer;
@@ -20,22 +16,22 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static java.util.Objects.requireNonNull;
 
 public abstract class AGUILangGraphAgent implements AGUIAgent {
-    public record GraphData( StateGraph<? extends AgentState> stateGraph,
+    public record GraphData( CompiledGraph<? extends AgentState> compiledGraph,
                              boolean interruption)
     {
         public GraphData {
-            requireNonNull( stateGraph, "stateGraph cannot ne bull");
+            requireNonNull( compiledGraph, "compiledGraph cannot ne bull");
         }
 
-        public GraphData( StateGraph<? extends AgentState> stateGraph) {
-            this(stateGraph, false);
+        public GraphData( CompiledGraph<? extends AgentState> compiledGraph) {
+            this(compiledGraph, false);
         }
 
         public GraphData withInterruption( boolean interrupt ) {
             if( this.interruption == interrupt ) {
                 return this;
             }
-            return new GraphData(stateGraph, interrupt);
+            return new GraphData(compiledGraph, interrupt);
         }
      }
 
@@ -49,13 +45,7 @@ public abstract class AGUILangGraphAgent implements AGUIAgent {
 
     static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AGUILangGraphAgent.class);
 
-    final BaseCheckpointSaver saver;
-
     private final Map<String, GraphData> graphByThread = new ConcurrentHashMap<>();
-
-    protected AGUILangGraphAgent(BaseCheckpointSaver saver ) {
-        this.saver = saver;
-    }
 
     protected abstract GraphData buildStateGraph() throws GraphStateException;
 
@@ -71,12 +61,7 @@ public abstract class AGUILangGraphAgent implements AGUIAgent {
         return Flux.create( emitter -> {
             try {
 
-                var compileConfig = CompileConfig.builder()
-                        .checkpointSaver(saver)
-                        .build();
-
-                var agent = graphData.stateGraph()
-                        .compile(compileConfig);
+                var agent = graphData.compiledGraph();
 
                 emitter.next(new AGUIEvent.RunStartedEvent(
                         input.threadId(),
