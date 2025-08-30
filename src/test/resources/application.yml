@@ -1,3 +1,6 @@
 spring:
   application:
     name: langgraph4j::ag-ui
+agui:
+  agent: agentExecutor
+  #agent: sample

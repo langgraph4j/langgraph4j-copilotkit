@@ -19,6 +19,7 @@ import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -27,6 +28,7 @@ import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 import static org.bsc.langgraph4j.utils.CollectionsUtils.lastOf;
 
+//@Component("AGUIAgent")
 public class AGUIAgentExecutor extends AGUILangGraphAgent {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AGUIAgentExecutor.class);
 
@@ -105,7 +107,7 @@ public class AGUIAgentExecutor extends AGUILangGraphAgent {
     }
 
     @Override
-    GraphData buildStateGraph() throws GraphStateException {
+    protected GraphData buildStateGraph() throws GraphStateException {
 
         var model = ofNullable(System.getenv("OPENAI_API_KEY"))
                 .map( key -> AiModel.OPENAI_GPT_4O_MINI.model.get())
@@ -132,7 +134,7 @@ public class AGUIAgentExecutor extends AGUILangGraphAgent {
     }
 
     @Override
-    Map<String, Object> buildGraphInput(AGUIType.RunAgentInput input) {
+    protected Map<String, Object> buildGraphInput(AGUIType.RunAgentInput input) {
 
         var lastUserMessage = input.lastUserMessage()
                 .map(AGUIMessage.TextMessage::content)
@@ -144,7 +146,7 @@ public class AGUIAgentExecutor extends AGUILangGraphAgent {
     }
 
     @Override
-    <State extends AgentState> List<Approval> onInterruption(AGUIType.RunAgentInput input, InterruptionMetadata<State> state ) {
+    protected <State extends AgentState> List<Approval> onInterruption(AGUIType.RunAgentInput input, InterruptionMetadata<State> state ) {
 
         var messages = state.state().<List<Message>>value("messages")
                 .orElseThrow( () -> new IllegalStateException("messages not found into given state"));

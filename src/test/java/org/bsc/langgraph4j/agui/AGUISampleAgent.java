@@ -2,6 +2,7 @@ package org.bsc.langgraph4j.agui;
 
 import reactor.core.publisher.Flux;
 
+//@Component("AGUIAgent")
 public class AGUISampleAgent implements AGUIAgent {
 
     @Override
