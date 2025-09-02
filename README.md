@@ -68,7 +68,7 @@ Open browser on [http://localhost:3000](http://localhost:3000) and play with cha
 * [LangGraph4j Meets AG-UI - Building UI/UX in the AI Agents era](https://bsorrentino.github.io/bsorrentino/ai/2025/08/21/LangGraph4j-meets-AG-UI.html)
 
 [releases]: https://central.sonatype.com/search?q=a%3Alanggraph4j-copilotkit
-[snapshots]: https://central.sonatype.com/repository/maven-snapshots/
+[snapshots]: https://central.sonatype.com/repository/maven-snapshots/org/bsc/langgraph4j/langgraph4j-copilotkit
 [AG-UI]: https://docs.ag-ui.com/introduction
 [CopilotKit]: https://www.copilotkit.ai
 [LangGraph4j]: https://github.com/langgraph4j/langgraph4j

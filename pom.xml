@@ -10,7 +10,7 @@
 	</parent>
 
 	<artifactId>langgraph4j-copilotkit</artifactId>
-	<version>0.0.1</version>
+	<version>0.0.2-SNAPSHOT</version>
 	<name>langgraph4j::ag-ui::copilotkit</name>
 	<description>Langgraph4j integrate AG-UI protocol using CopilotKit</description>
 	<url>https://github.com/langgraph4j/langgraph4j-copilotkit</url>
