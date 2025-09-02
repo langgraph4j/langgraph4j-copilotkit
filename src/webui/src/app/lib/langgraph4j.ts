@@ -87,6 +87,49 @@ interface ToolCallArgs extends BaseMessage {
  */
 type Message = RunStarted | TextMessageStart | TextMessageContent | TextMessageEnd | RunFinished | ToolCallStart | ToolCallEnd | ToolCallArgs;
 
+
+async function *fetchMessages( reader: ReadableStreamDefaultReader<string> ): AsyncGenerator<Message> {
+      let buffer = ''
+
+      const { done, value } = await reader.read();
+
+      if (done) {
+        return;
+      }
+
+      buffer += value;
+
+      // Split buffer by newlines and process complete messages
+      const lines = buffer.split('\n');
+      const lastLine = lines.pop(); // Keep the last incomplete line in buffer
+
+      const regex = /^data:(.+)$/m;
+
+      for (const line of lines) {
+        const match = line.match(regex);
+        if (match) {
+          yield JSON.parse(match[1]);
+        }
+      }
+
+      if( lastLine ) {
+        const m = lastLine.match(regex);
+        if (m) {
+          try {
+            yield JSON.parse(m[1]);
+            buffer = ''; // Clear buffer
+          } catch (error) {
+            buffer = lastLine; // Keep the last line in buffer for next iteration
+            console.warn("fetch is incomplete. LastLine :", lastLine);
+          }
+        }
+      }
+      else {
+        buffer = ''; // Clear buffer if no last line
+      }
+
+}
+
 /**
  * Implements the `CopilotServiceAdapter` to connect CopilotKit with a LangGraph4j backend.
  * This adapter handles the communication by making a POST request to the LangGraph4j service
@@ -127,7 +170,8 @@ export class Langgraph4jAdapter implements CopilotServiceAdapter {
         signal: this.abortController.signal,
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Accept': 'text/event-stream'
         },
         body: JSON.stringify(request),
 
@@ -138,26 +182,23 @@ export class Langgraph4jAdapter implements CopilotServiceAdapter {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const reader = response.body?.pipeThrough(new TextDecoderStream()).getReader();
+      //const reader = response.body?.pipeThrough(new TextDecoderStream()).getReader();
+
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+
       if (!reader) {
         throw new Error('Response body is null');
       }
+
 
       eventSource.stream(async (eventStream$) => {
 
         try {
           let buffer = ''
-          let fetchEvents = true
 
-          while (fetchEvents) {
-
-            const { done, value } = await reader.read();
-
-            if (done) {
-              fetchEvents = false;
-              break;
-            }
-
+          const fetchMessages = ( value: string | undefined) => async function *(): AsyncGenerator<Message> {
+            
             buffer += value;
 
             // Split buffer by newlines and process complete messages
@@ -166,16 +207,18 @@ export class Langgraph4jAdapter implements CopilotServiceAdapter {
 
             const regex = /^data:(.+)$/m;
 
-            const messages: Message[] = lines.map(line => line.match(regex))
-              .filter(match => match !== null)
-              .map(match => JSON.parse(match![1])) // Non-null assertion since we filtered nulls
-              ;
-            
+            for (const line of lines) {
+              const match = line.match(regex);
+              if (match) {
+                yield JSON.parse(match[1])
+              }
+            }
+
             if( lastLine ) {
               const m = lastLine.match(regex);
               if (m) {
                 try {
-                  messages.push(JSON.parse(m[1]));
+                  yield JSON.parse(m[1])
                   buffer = ''; // Clear buffer
                 } catch (error) {
                   buffer = lastLine; // Keep the last line in buffer for next iteration
@@ -186,10 +229,29 @@ export class Langgraph4jAdapter implements CopilotServiceAdapter {
             else {
               buffer = ''; // Clear buffer if no last line
             }
+          }
 
-            
-            console.debug(`${threadId} - Fetched messages:`, messages);
-            for (const message of messages) {
+          let fetchEvents = true
+
+          while (fetchEvents) {
+
+            const { done, value: buffer } = await reader.read();
+            const value = decoder.decode(buffer, { stream: true });
+
+
+            console.debug(`Fetch value:`, done, value);
+
+            if (done) {
+              fetchEvents = false;
+              break;
+            }
+
+            const messageGenerator =  fetchMessages( value )
+
+            for await (const message of messageGenerator() ) {
+  
+              console.debug(`${threadId} - Fetch message:`, message.type);
+
               switch (message.type) {
                 case 'RUN_STARTED':
                   
@@ -237,7 +299,6 @@ export class Langgraph4jAdapter implements CopilotServiceAdapter {
                   console.error('Unexpected message type:', message);
                   break;
               }
-
             }
 
           }
