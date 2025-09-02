@@ -17,19 +17,19 @@ public class AGUISSEController {
     final AGUIAgent uiAgent;
     final ObjectMapper mapper = new ObjectMapper();
 
-    public AGUISSEController( @Qualifier("AGUIAgent") AGUIAgent uiAgent) {
+    public AGUISSEController( @Qualifier("AGUIAgent")   AGUIAgent uiAgent) {
         this.uiAgent = uiAgent;
     }
 
-    @PostMapping(path = "/copilotkit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ServerSentEvent<AGUIEvent>> copilotKit(@RequestBody String runAgentInputPayload) throws Exception {
+    @PostMapping(path = "/copilotkit",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.TEXT_EVENT_STREAM_VALUE
+            )
+    public Flux<? extends AGUIEvent> copilotKit(@RequestBody String runAgentInputPayload) throws Exception {
 
         var input = mapper.readValue(runAgentInputPayload, AGUIType.RunAgentInput.class);
-        return uiAgent.run( input )
-                .map( event -> ServerSentEvent.<AGUIEvent>builder()
-                        .id(input.threadId())
-                        .data(event)
-                .build());
+
+        return uiAgent.run( input );
     }
 
     /**
