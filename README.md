@@ -1,3 +1,5 @@
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg) [![Static Badge](https://img.shields.io/badge/maven--snapshots-0.0.2--SNAPSHOT-blue)][snapshots] [![Maven Central](https://img.shields.io/maven-central/v/org.bsc.langgraph4j/langgraph4j-copilotkit.svg)][releases][![discord](https://img.shields.io/discord/1364514593765986365?logo=discord&style=flat)](https://discord.gg/szVVztSYKh)
+
 # LangGraph4j support for CopilotKit
 
 Make [LangGraph4j] compliant with [AG-UI protocol][AG-UI] with [CopilotKit] integration
@@ -65,7 +67,8 @@ Open browser on [http://localhost:3000](http://localhost:3000) and play with cha
 
 * [LangGraph4j Meets AG-UI - Building UI/UX in the AI Agents era](https://bsorrentino.github.io/bsorrentino/ai/2025/08/21/LangGraph4j-meets-AG-UI.html)
 
-
+[releases]: https://central.sonatype.com/search?q=a%3Alanggraph4j-copilotkit
+[snapshots]: https://central.sonatype.com/repository/maven-snapshots/
 [AG-UI]: https://docs.ag-ui.com/introduction
 [CopilotKit]: https://www.copilotkit.ai
 [LangGraph4j]: https://github.com/langgraph4j/langgraph4j
