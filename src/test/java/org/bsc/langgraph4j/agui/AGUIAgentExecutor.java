@@ -3,6 +3,7 @@ package org.bsc.langgraph4j.agui;
 import org.bsc.langgraph4j.CompileConfig;
 import org.bsc.langgraph4j.GraphRepresentation;
 import org.bsc.langgraph4j.GraphStateException;
+import org.bsc.langgraph4j.NodeOutput;
 import org.bsc.langgraph4j.action.InterruptionMetadata;
 import org.bsc.langgraph4j.checkpoint.MemorySaver;
 import org.bsc.langgraph4j.spring.ai.agentexecutor.AgentExecutorEx;
@@ -20,7 +21,6 @@ import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
-import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -29,7 +29,7 @@ import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 import static org.bsc.langgraph4j.utils.CollectionsUtils.lastOf;
 
-//@Component("AGUIAgent")
+//@org.springframework.stereotype.Component("AGUIAgent")
 public class AGUIAgentExecutor extends AGUILangGraphAgent {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AGUIAgentExecutor.class);
 
@@ -169,6 +169,16 @@ public class AGUIAgentExecutor extends AGUILangGraphAgent {
                 .orElseGet(List::of);
 
     }
+
+    @Override
+    protected Optional<String> nodeOutputToText(NodeOutput<? extends AgentState> output) {
+        if( output.isEND() | output.isSTART() ) {
+            return Optional.empty();
+        }
+
+        throw new UnsupportedOperationException("not implemented yet");
+    }
+
 
     public static void main( String[] argv ) throws Exception {
 
