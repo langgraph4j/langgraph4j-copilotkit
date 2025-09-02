@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.bsc.langgraph4j</groupId>
 		<artifactId>langgraph4j-parent</artifactId>
-		<version>1.6-SNAPSHOT</version>
+		<version>1.6.2</version>
 	</parent>
 
-	<artifactId>langgraph4j-ag-ui</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>langgraph4j::ag-ui</name>
-	<description>Langgraph4j integrate AG-UI protocol</description>
-	<url/>
+	<artifactId>langgraph4j-copilotkit</artifactId>
+	<version>0.0.1</version>
+	<name>langgraph4j::ag-ui::copilotkit</name>
+	<description>Langgraph4j integrate AG-UI protocol using CopilotKit</description>
+	<url>https://github.com/langgraph4j/langgraph4j-copilotkit</url>
 	<licenses>
 		<license>
 			<name>MIT</name>
@@ -24,12 +25,13 @@
 			<email>bartolomeo.sorrentino@gmail.com</email>
 		</developer>
 	</developers>
-	<scm>
-		<connection/>
-		<developerConnection/>
-		<tag/>
-		<url/>
-	</scm>
+	
+	<!-- <scm>
+		<connection />
+		<developerConnection />
+		<tag />
+		<url />
+	</scm> -->
 	<properties>
 		<java.version>17</java.version>
 		<spring-ai.version>1.0.0</spring-ai.version>
@@ -126,6 +128,7 @@
 		</dependency>
 		-->
 
+
 	</dependencies>
 
 	<build>
@@ -134,6 +137,19 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+
+			<plugin>
+				<groupId>org.sonatype.central</groupId>
+				<artifactId>central-publishing-maven-plugin</artifactId>
+				<version>0.8.0</version>
+				<extensions>true</extensions>
+				<configuration>
+					<publishingServerId>sonatype-central</publishingServerId>
+					<autoPublish>true</autoPublish>
+					<waitUntil>published</waitUntil>
+				</configuration>
+			</plugin>
+
 		</plugins>
 	</build>
 
@@ -150,5 +166,26 @@
 			</releases>
 		</repository>
 	</repositories>
+
+	<profiles>
+		<profile>
+			<id>macos-dns-native</id>
+			<activation>
+				<os>
+					<family>mac</family>
+					<arch>aarch64</arch>
+				</os>
+			</activation>
+			<dependencies>
+				<dependency>
+					<groupId>io.netty</groupId>
+					<artifactId>netty-resolver-dns-native-macos</artifactId>
+					<version>4.1.115.Final</version>
+					<classifier>osx-aarch_64</classifier>
+					<scope>runtime</scope>
+				</dependency>
+			</dependencies>
+		</profile>
+	</profiles>
 
 </project>

@@ -1,7 +1,9 @@
 package org.bsc.langgraph4j.agui;
 
+import org.bsc.langgraph4j.CompileConfig;
 import org.bsc.langgraph4j.GraphRepresentation;
 import org.bsc.langgraph4j.GraphStateException;
+import org.bsc.langgraph4j.NodeOutput;
 import org.bsc.langgraph4j.action.InterruptionMetadata;
 import org.bsc.langgraph4j.checkpoint.MemorySaver;
 import org.bsc.langgraph4j.spring.ai.agentexecutor.AgentExecutorEx;
@@ -27,6 +29,7 @@ import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 import static org.bsc.langgraph4j.utils.CollectionsUtils.lastOf;
 
+//@org.springframework.stereotype.Component("AGUIAgent")
 public class AGUIAgentExecutor extends AGUILangGraphAgent {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AGUIAgentExecutor.class);
 
@@ -100,12 +103,12 @@ public class AGUIAgentExecutor extends AGUILangGraphAgent {
         }
     }
 
-    public AGUIAgentExecutor() {
-        super(new MemorySaver());
-    }
+    private final MemorySaver saver = new MemorySaver();
+
+    public AGUIAgentExecutor() {}
 
     @Override
-    GraphData buildStateGraph() throws GraphStateException {
+    protected GraphData buildStateGraph() throws GraphStateException {
 
         var model = ofNullable(System.getenv("OPENAI_API_KEY"))
                 .map( key -> AiModel.OPENAI_GPT_4O_MINI.model.get())
@@ -128,11 +131,13 @@ public class AGUIAgentExecutor extends AGUILangGraphAgent {
                 agent.getGraph(GraphRepresentation.Type.PLANTUML, "Agent Executor", false).content()
         );
 
-        return new GraphData( agent ) ;
+        var compileConfig = CompileConfig.builder().checkpointSaver(saver).build();
+
+        return new GraphData( agent.compile(compileConfig) ) ;
     }
 
     @Override
-    Map<String, Object> buildGraphInput(AGUIType.RunAgentInput input) {
+    protected Map<String, Object> buildGraphInput(AGUIType.RunAgentInput input) {
 
         var lastUserMessage = input.lastUserMessage()
                 .map(AGUIMessage.TextMessage::content)
@@ -144,7 +149,7 @@ public class AGUIAgentExecutor extends AGUILangGraphAgent {
     }
 
     @Override
-    <State extends AgentState> List<Approval> onInterruption(AGUIType.RunAgentInput input, InterruptionMetadata<State> state ) {
+    protected <State extends AgentState> List<Approval> onInterruption(AGUIType.RunAgentInput input, InterruptionMetadata<State> state ) {
 
         var messages = state.state().<List<Message>>value("messages")
                 .orElseThrow( () -> new IllegalStateException("messages not found into given state"));
@@ -164,6 +169,16 @@ public class AGUIAgentExecutor extends AGUILangGraphAgent {
                 .orElseGet(List::of);
 
     }
+
+    @Override
+    protected Optional<String> nodeOutputToText(NodeOutput<? extends AgentState> output) {
+        if( output.isEND() | output.isSTART() ) {
+            return Optional.empty();
+        }
+
+        throw new UnsupportedOperationException("not implemented yet");
+    }
+
 
     public static void main( String[] argv ) throws Exception {
 

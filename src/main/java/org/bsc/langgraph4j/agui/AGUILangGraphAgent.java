@@ -1,41 +1,40 @@
 package org.bsc.langgraph4j.agui;
-import org.bsc.langgraph4j.CompileConfig;
-import org.bsc.langgraph4j.GraphStateException;
-import org.bsc.langgraph4j.RunnableConfig;
-import org.bsc.langgraph4j.StateGraph;
+import org.bsc.async.AsyncGenerator;
+import org.bsc.langgraph4j.*;
 import org.bsc.langgraph4j.action.InterruptionMetadata;
 import org.bsc.langgraph4j.agent.AgentEx;
-import org.bsc.langgraph4j.checkpoint.BaseCheckpointSaver;
 import org.bsc.langgraph4j.state.AgentState;
 import org.bsc.langgraph4j.streaming.StreamingOutput;
-import org.bsc.langgraph4j.utils.TryConsumer;
 import org.bsc.langgraph4j.utils.TryFunction;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
-import java.util.List;
-import java.util.Map;
+import java.time.Duration;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static java.util.Objects.requireNonNull;
 
 public abstract class AGUILangGraphAgent implements AGUIAgent {
-    public record GraphData( StateGraph<? extends AgentState> stateGraph,
+
+    public record GraphData( CompiledGraph<? extends AgentState> compiledGraph,
                              boolean interruption)
     {
         public GraphData {
-            requireNonNull( stateGraph, "stateGraph cannot ne bull");
+            requireNonNull( compiledGraph, "compiledGraph cannot ne bull");
         }
 
-        public GraphData( StateGraph<? extends AgentState> stateGraph) {
-            this(stateGraph, false);
+        public GraphData( CompiledGraph<? extends AgentState> compiledGraph) {
+            this(compiledGraph, false);
         }
 
         public GraphData withInterruption( boolean interrupt ) {
             if( this.interruption == interrupt ) {
                 return this;
             }
-            return new GraphData(stateGraph, interrupt);
+            return new GraphData(compiledGraph, interrupt);
         }
      }
 
@@ -49,141 +48,151 @@ public abstract class AGUILangGraphAgent implements AGUIAgent {
 
     static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AGUILangGraphAgent.class);
 
-    final BaseCheckpointSaver saver;
-
     private final Map<String, GraphData> graphByThread = new ConcurrentHashMap<>();
 
-    protected AGUILangGraphAgent(BaseCheckpointSaver saver ) {
-        this.saver = saver;
+    protected abstract GraphData buildStateGraph() throws GraphStateException;
+
+    protected abstract Map<String,Object> buildGraphInput( AGUIType.RunAgentInput input );
+
+    protected abstract <State extends AgentState> List<Approval> onInterruption(AGUIType.RunAgentInput input, InterruptionMetadata<State> state );
+
+    protected abstract  Optional<String> nodeOutputToText( NodeOutput<? extends AgentState> output );
+
+    private final AtomicReference<String> streamingId = new AtomicReference<>();
+
+    private String newMessageId() {
+        return String.valueOf(System.currentTimeMillis());
     }
-
-    abstract GraphData buildStateGraph() throws GraphStateException;
-
-    abstract Map<String,Object> buildGraphInput( AGUIType.RunAgentInput input );
-
-    abstract <State extends AgentState> List<Approval> onInterruption(AGUIType.RunAgentInput input, InterruptionMetadata<State> state );
 
     @Override
     public final Flux<? extends AGUIEvent> run(AGUIType.RunAgentInput input) {
 
-        final var graphData = graphByThread.computeIfAbsent(input.threadId(), TryFunction.Try(k -> buildStateGraph() ));
+        final var graphData = graphByThread.computeIfAbsent(input.threadId(),
+                TryFunction.Try(k -> buildStateGraph() ));
 
-        return Flux.create( emitter -> {
-            try {
+        try {
 
-                var compileConfig = CompileConfig.builder()
-                        .checkpointSaver(saver)
-                        .build();
+            var agent = graphData.compiledGraph();
 
-                var agent = graphData.stateGraph()
-                        .compile(compileConfig);
+            var runnableConfig = RunnableConfig.builder()
+                    .threadId(input.threadId())
+                    .build();
 
-                emitter.next(new AGUIEvent.RunStartedEvent(
-                        input.threadId(),
-                        input.runId()));
 
-                var messageId = String.valueOf(System.currentTimeMillis());
+            final Map<String,Object> graphInput ;
 
-                var runnableConfig = RunnableConfig.builder()
-                        .threadId(input.threadId())
-                        .build();
+            if( graphData.interruption() ) {
 
-                var isEmittingChunk = new AtomicBoolean(false);
+                var lastResultMessage = input.lastResultMessage()
+                        .map(AGUIMessage.ResultMessage::result)
+                        .orElseThrow( () -> new IllegalStateException( "last result message not found after interruption") );
 
-                final Map<String,Object> graphInput ;
+                runnableConfig = agent.updateState( runnableConfig, Map.of(AgentEx.APPROVAL_RESULT_PROPERTY, lastResultMessage ));
 
-                if( graphData.interruption() ) {
+                graphInput = null; // resume graph
+            }
+            else {
+                graphInput = buildGraphInput(input);
+            }
 
-                    var lastResultMessage = input.lastResultMessage()
-                                    .map(AGUIMessage.ResultMessage::result)
-                                    .orElseThrow( () -> new IllegalStateException( "last result message not found after interruption") );
+            final var outputGenerator = agent.stream( graphInput, runnableConfig );
 
-                    runnableConfig = agent.updateState( runnableConfig, Map.of(AgentEx.APPROVAL_RESULT_PROPERTY, lastResultMessage ));
+            var outputFlux = Flux.<AGUIEvent>create( emitter -> {
 
-                    graphInput = null; // resume graph
+                for( var event : outputGenerator ) {
+
+                    if (event instanceof StreamingOutput<? extends AgentState> output) {
+                        var messageId = streamingId.get();
+                        if(messageId==null) {
+                            log.trace( "STREAMING START");
+                            messageId = streamingId.updateAndGet( v -> newMessageId() );
+                            emitter.next(new AGUIEvent.TextMessageStartEvent(messageId));
+                        }
+
+                        if( output.chunk() == null || output.chunk().isEmpty()) {
+                            log.trace( "STREAMING CHUNK IS EMPTY");
+                        }
+                        else {
+                            log.trace( "{}", output.chunk());
+                            emitter.next(new AGUIEvent.TextMessageContentEvent(messageId, output.chunk()));
+                        }
+                    } else {
+
+                        var messageId = streamingId.get();
+
+                        if( messageId == null ) {
+                            log.trace( "NEXT:\n{}", event);
+
+                            messageId = newMessageId();
+                            emitter.next(new AGUIEvent.TextMessageStartEvent(messageId));
+                            var text = nodeOutputToText(event);
+                            if( text.isPresent() ) {
+                                emitter.next(new AGUIEvent.TextMessageContentEvent(messageId,text.get()));
+                            }
+                        }
+                        else {
+                            log.trace("STREAMING END");
+                            streamingId.set(null);
+                        }
+                        emitter.next(new AGUIEvent.TextMessageEndEvent(messageId));
+                    }
+
+                }
+
+                final var result = AsyncGenerator.resultValue(outputGenerator).orElse(null);
+
+                log.trace( "COMPLETE:\n{}", result);
+
+                if( result instanceof InterruptionMetadata<?> interruptionMetadata ) {
+
+                    log.trace( "INTERRUPTION DETECTED: {}",interruptionMetadata );
+
+                    graphByThread.put(input.threadId(), graphData.withInterruption(true));
+
+                    onInterruption(input, interruptionMetadata).forEach( approval -> {
+                        emitter.next( new AGUIEvent.ToolCallStartEvent(
+                                approval.toolId(),
+                                approval.toolName(),
+                                null));
+
+                        emitter.next( new AGUIEvent.ToolCallArgsEvent(
+                                approval.toolId(),
+                                approval.toolArgs()));
+
+                        emitter.next( new AGUIEvent.ToolCallEndEvent(
+                                approval.toolId() ));
+
+                    });
+
                 }
                 else {
-                    graphInput = buildGraphInput(input);
+                    graphByThread.put(input.threadId(), graphData.withInterruption(false));
+
+                    // Thread CleanUp
+                    //graphByThread.remove(input.threadId());
+                    //var tag = saver.release( runnableConfig );
+                    //log.debug( "thread '{}' released", tag.threadId() );
+
                 }
 
-                agent.stream( graphInput, runnableConfig )
-                        .async()
-                        .forEachAsync( event -> {
+                emitter.complete();
 
-                            if (event instanceof StreamingOutput<? extends AgentState> output) {
-
-                                if(isEmittingChunk.compareAndSet(false, true)) {
-                                    log.trace( "STREAMING START");
-                                    emitter.next(new AGUIEvent.TextMessageStartEvent(messageId));
-                                }
-
-                                if( output.chunk() == null || output.chunk().isEmpty()) {
-                                    log.trace( "STREAMING CHUNK IS EMPTY");
-                                }
-                                else {
-                                    log.trace( "{}", output.chunk());
-                                        emitter.next(new AGUIEvent.TextMessageContentEvent(messageId, output.chunk()));
-                                }
-
-                            } else {
-
-                                var isEndEmittingChunk = isEmittingChunk.compareAndSet(true, false);
-
-                                if(isEndEmittingChunk) {
-                                    log.trace( "STREAMING END");
-                                    emitter.next(new AGUIEvent.TextMessageEndEvent(messageId));
-                                }
-                                else {
-                                    log.trace( "NEXT:\n{}", event);
-                                }
-                            }
-
-                        }).thenAccept( TryConsumer.Try(result -> {
-                            log.trace( "COMPLETE:\n{}", result);
+            });
+            return Mono.<AGUIEvent>just(
+                            new AGUIEvent.RunStartedEvent( input.threadId(), input.runId())
+                    )
+                    .concatWith( outputFlux.subscribeOn(Schedulers.single()) )
+                    .concatWith(
+                            Mono.<AGUIEvent>just(
+                                    new AGUIEvent.RunFinishedEvent(input.threadId(), input.runId() )) );
 
 
-                            if( result instanceof InterruptionMetadata<?> interruptionMetadata ) {
 
-                                log.trace( "INTERRUPTION DETECTED: {}",interruptionMetadata );
+        }
+        catch( Exception e ) {
+            return Flux.error(e);
+        }
 
-                                graphByThread.put(input.threadId(), graphData.withInterruption(true));
-
-                                onInterruption(input, interruptionMetadata).forEach( approval -> {
-                                    emitter.next( new AGUIEvent.ToolCallStartEvent(
-                                            approval.toolId(),
-                                            approval.toolName(),
-                                            null));
-
-                                    emitter.next( new AGUIEvent.ToolCallArgsEvent(
-                                            approval.toolId(),
-                                            approval.toolArgs()));
-
-                                    emitter.next( new AGUIEvent.ToolCallEndEvent(
-                                            approval.toolId() ));
-
-                                });
-
-                            }
-                            else {
-                                graphByThread.put(input.threadId(), graphData.withInterruption(false));
-
-                                emitter.next(new AGUIEvent.RunFinishedEvent(
-                                        input.threadId(),
-                                        input.runId()));
-                                // Thread CleanUp
-                                //graphByThread.remove(input.threadId());
-                                //var tag = saver.release( runnableConfig );
-                                //log.debug( "thread '{}' released", tag.threadId() );
-                            }
-
-                        })).join();
-
-            }
-            catch( Exception e ) {
-                emitter.error(e);
-            }
-
-        });
     }
 
 }

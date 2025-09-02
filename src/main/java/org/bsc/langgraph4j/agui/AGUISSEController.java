@@ -1,6 +1,7 @@
 package org.bsc.langgraph4j.agui;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
@@ -16,27 +17,28 @@ public class AGUISSEController {
     final AGUIAgent uiAgent;
     final ObjectMapper mapper = new ObjectMapper();
 
-    public AGUISSEController(AGUIAgent uiAgent) {
+    public AGUISSEController( @Qualifier("AGUIAgent")   AGUIAgent uiAgent) {
         this.uiAgent = uiAgent;
     }
 
-    @PostMapping(path = "/copilotkit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ServerSentEvent<AGUIEvent>> copilotKit(@RequestBody String runAgentInputPayload) throws Exception {
+    @PostMapping(path = "/copilotkit",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.TEXT_EVENT_STREAM_VALUE
+            )
+    public Flux<? extends AGUIEvent> copilotKit(@RequestBody String runAgentInputPayload) throws Exception {
 
         var input = mapper.readValue(runAgentInputPayload, AGUIType.RunAgentInput.class);
-        return uiAgent.run( input )
-                .map( event -> ServerSentEvent.<AGUIEvent>builder()
-                        .id(input.threadId())
-                        .data(event)
-                .build());
+
+        return uiAgent.run( input );
     }
+
     /**
      * Endpoint to stream Server-Sent Events.
      * This example emits a message every second with the current time.
      *
      * @return A Flux of ServerSentEvent objects.
      */
-    @GetMapping(path = "/sse-events", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    // @GetMapping(path = "/sse-events", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ServerSentEvent<String>> streamEvents() {
         return Flux.interval(Duration.ofSeconds(1))
                 .map(sequence -> ServerSentEvent.<String>builder()
@@ -53,7 +55,7 @@ public class AGUISSEController {
      *
      * @return A Flux of ServerSentEvent objects.
      */
-    @GetMapping(path = "/sse-complex-events", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    // @GetMapping(path = "/sse-complex-events", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ServerSentEvent<Object>> streamComplexEvents() {
         // Simulate different types of events
         Flux<ServerSentEvent<Object>> heartBeat = Flux.interval(Duration.ofSeconds(10))
