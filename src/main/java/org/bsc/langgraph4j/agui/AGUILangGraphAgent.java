@@ -10,7 +10,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
-import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
@@ -56,11 +55,27 @@ public abstract class AGUILangGraphAgent implements AGUIAgent {
 
     protected abstract <State extends AgentState> List<Approval> onInterruption(AGUIType.RunAgentInput input, InterruptionMetadata<State> state );
 
-    protected abstract  Optional<String> nodeOutputToText( NodeOutput<? extends AgentState> output );
+    protected Optional<String> nodeOutputToText( NodeOutput<? extends AgentState> output ) {
+        return Optional.empty();
+    }
+
+    protected Collection<?extends AGUIEvent> nodeOutputToEvents( AGUIType.RunAgentInput input, NodeOutput<? extends AgentState> output ) {
+        var text = nodeOutputToText(output);
+        if( text.isEmpty() ) {
+            return List.of();
+        }
+
+        var messageId = newMessageId();
+        return List.of(
+                new AGUIEvent.TextMessageStartEvent(messageId),
+                new AGUIEvent.TextMessageContentEvent(messageId,text.get()),
+                new AGUIEvent.TextMessageEndEvent(messageId)
+        );
+    }
 
     private final AtomicReference<String> streamingId = new AtomicReference<>();
 
-    private String newMessageId() {
+    protected String newMessageId() {
         return String.valueOf(System.currentTimeMillis());
     }
 
@@ -123,18 +138,13 @@ public abstract class AGUILangGraphAgent implements AGUIAgent {
                         if( messageId == null ) {
                             log.trace( "NEXT:\n{}", event);
 
-                            messageId = newMessageId();
-                            emitter.next(new AGUIEvent.TextMessageStartEvent(messageId));
-                            var text = nodeOutputToText(event);
-                            if( text.isPresent() ) {
-                                emitter.next(new AGUIEvent.TextMessageContentEvent(messageId,text.get()));
-                            }
+                            nodeOutputToEvents(input, event).forEach( emitter::next );
                         }
                         else {
                             log.trace("STREAMING END");
                             streamingId.set(null);
+                            emitter.next(new AGUIEvent.TextMessageEndEvent(messageId));
                         }
-                        emitter.next(new AGUIEvent.TextMessageEndEvent(messageId));
                     }
 
                 }
