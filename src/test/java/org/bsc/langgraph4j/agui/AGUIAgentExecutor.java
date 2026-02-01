@@ -9,6 +9,7 @@ import org.bsc.langgraph4j.checkpoint.MemorySaver;
 import org.bsc.langgraph4j.spring.ai.agentexecutor.AgentExecutorEx;
 import org.bsc.langgraph4j.spring.ai.util.MessageUtil;
 import org.bsc.langgraph4j.state.AgentState;
+
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
@@ -31,7 +32,6 @@ import static org.bsc.langgraph4j.utils.CollectionsUtils.lastOf;
 
 //@org.springframework.stereotype.Component("AGUIAgent")
 public class AGUIAgentExecutor extends AGUILangGraphAgent {
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AGUIAgentExecutor.class);
 
     enum AiModel {
 

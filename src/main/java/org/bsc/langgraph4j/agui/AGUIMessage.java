@@ -3,7 +3,6 @@ package org.bsc.langgraph4j.agui;
 import com.fasterxml.jackson.annotation.*;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 

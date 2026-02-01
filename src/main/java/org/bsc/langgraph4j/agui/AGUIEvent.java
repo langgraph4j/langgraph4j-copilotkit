@@ -45,9 +45,6 @@ public interface AGUIEvent {
     @JsonProperty("timestamp")
     Long timestamp(); // Optional, maps to Python's Optional[int]
 
-//    @JsonProperty("raw_event")
-//    Object rawEvent(); // Optional, maps to Python's Optional[Any]
-
     /**
      * Defines the event types for the Agent User Interaction Protocol.
      */
@@ -84,7 +81,6 @@ public interface AGUIEvent {
     record TextMessageStartEvent(
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
-            //@JsonProperty("raw_event") Object rawEvent,
             @JsonProperty("message_id") String messageId,
             @JsonProperty("role") String role
     ) implements AGUIEvent {
@@ -107,7 +103,6 @@ public interface AGUIEvent {
     record TextMessageContentEvent(
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
-            //@JsonProperty("raw_event") Object rawEvent,
             @JsonProperty("message_id") String messageId,
             @JsonProperty("delta") String delta
     ) implements AGUIEvent {
@@ -130,7 +125,6 @@ public interface AGUIEvent {
     record TextMessageEndEvent(
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
-            //@JsonProperty("raw_event") Object rawEvent,
             @JsonProperty("message_id") String messageId
     ) implements AGUIEvent {
         public TextMessageEndEvent {
@@ -148,7 +142,6 @@ public interface AGUIEvent {
     record ToolCallStartEvent(
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
-            //@JsonProperty("raw_event") Object rawEvent,
             @JsonProperty("tool_call_id") String toolCallId,
             @JsonProperty("tool_call_name") String toolCallName,
             @JsonProperty("parent_message_id") String parentMessageId // Optional
@@ -169,7 +162,6 @@ public interface AGUIEvent {
     record ToolCallArgsEvent(
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
-            //@JsonProperty("raw_event") Object rawEvent,
             @JsonProperty("tool_call_id") String toolCallId,
             @JsonProperty("tool_call_args") String args
     ) implements AGUIEvent {
@@ -189,7 +181,6 @@ public interface AGUIEvent {
     record ToolCallEndEvent(
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
-            //@JsonProperty("raw_event") Object rawEvent,
             @JsonProperty("tool_call_id") String toolCallId
     ) implements AGUIEvent {
         public ToolCallEndEvent {
@@ -207,7 +198,6 @@ public interface AGUIEvent {
     record ToolCallChunkEvent(
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
-            //@JsonProperty("raw_event") Object rawEvent,
             @JsonProperty("tool_call_id") String toolCallId,         // Optional
             @JsonProperty("tool_call_name") String toolCallName,     // Optional
             @JsonProperty("parent_message_id") String parentMessageId, // Optional
@@ -227,7 +217,6 @@ public interface AGUIEvent {
     record StateSnapshotEvent(
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
-            //@JsonProperty("raw_event") Object rawEvent,
             @JsonProperty("snapshot") State snapshot
     ) implements AGUIEvent {
         public StateSnapshotEvent {
@@ -245,7 +234,6 @@ public interface AGUIEvent {
     record StateDeltaEvent(
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
-            //@JsonProperty("raw_event") Object rawEvent,
             @JsonProperty("delta") List<Object> delta // Represents JSON Patch operations
     ) implements AGUIEvent {
         public StateDeltaEvent {
@@ -263,7 +251,6 @@ public interface AGUIEvent {
     record MessagesSnapshotEvent(
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
-            //@JsonProperty("raw_event") Object rawEvent,
             @JsonProperty("messages") List<Message> messages
     ) implements AGUIEvent {
         public MessagesSnapshotEvent {
@@ -281,7 +268,6 @@ public interface AGUIEvent {
     record CustomEvent(
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
-            //@JsonProperty("raw_event") Object rawEvent,
             @JsonProperty("name") String name,
             @JsonProperty("value") Object value
     ) implements AGUIEvent {
@@ -302,7 +288,6 @@ public interface AGUIEvent {
     record RunStartedEvent(
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
-            //@JsonProperty("raw_event") Object rawEvent,
             @JsonProperty("thread_id") String threadId,
             @JsonProperty("run_id") String runId
     ) implements AGUIEvent {
@@ -322,7 +307,6 @@ public interface AGUIEvent {
     record RunFinishedEvent(
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
-            //@JsonProperty("raw_event") Object rawEvent,
             @JsonProperty("thread_id") String threadId,
             @JsonProperty("run_id") String runId
     ) implements AGUIEvent {
@@ -342,7 +326,6 @@ public interface AGUIEvent {
     record RunErrorEvent(
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
-            //@JsonProperty("raw_event") Object rawEvent,
             @JsonProperty("message") String message,
             @JsonProperty("code") String code // Optional
     ) implements AGUIEvent {
@@ -361,7 +344,6 @@ public interface AGUIEvent {
     record StepStartedEvent(
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
-            //@JsonProperty("raw_event") Object rawEvent,
             @JsonProperty("step_name") String stepName
     ) implements AGUIEvent {
         public StepStartedEvent {
@@ -379,7 +361,6 @@ public interface AGUIEvent {
     record StepFinishedEvent(
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
-            //@JsonProperty("raw_event") Object rawEvent,
             @JsonProperty("step_name") String stepName
     ) implements AGUIEvent {
         public StepFinishedEvent {
