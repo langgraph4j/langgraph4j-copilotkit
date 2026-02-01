@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static java.util.Objects.requireNonNull;
 
-public abstract class AGUILangGraphAgent implements AGUIAgent {
+public abstract class AGUILangGraphAgent implements AGUIAgent, LG4JLoggable {
 
     public record GraphData( CompiledGraph<? extends AgentState> compiledGraph,
                              boolean interruption)
