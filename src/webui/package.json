@@ -9,12 +9,12 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@copilotkit/react-core": "^1.8.14",
-    "@copilotkit/react-ui": "^1.8.14",
-    "@copilotkit/runtime": "^1.8.14",
-    "next": "15.3.3",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "@copilotkit/react-core": "^1.10.5 ",
+    "@copilotkit/react-ui": "^1.10.5 ",
+    "@copilotkit/runtime": "^1.10.5 ",
+    "next": "15.5.4",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
   },
   "devDependencies": {
     "typescript": "^5",
