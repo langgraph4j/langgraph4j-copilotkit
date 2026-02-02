@@ -9,7 +9,10 @@ Make [LangGraph4j] compliant with [AG-UI protocol][AG-UI] with [CopilotKit] inte
 ```mermaid
 flowchart LR
     User((User))
-    CopilotKit(Copilot Kit)
+    subgraph Browser
+        CopilotKitW(Copilot Kit widget)
+    end
+    CopilotKit(Copilot Kit server)
     LangGraph4JAdaptor(LangGraph4J AGUI Adaptor
     Typescript)
     LangGraph4JServer(LangGraph4J AGUI Adaptor
@@ -21,14 +24,15 @@ flowchart LR
     subgraph "LangGraph4J Server"
         LangGraph4JServer --> Agent
     end
-    User --> CopilotKit
-    %%CopilotKit --> LangGraph4JAdaptor
+    User --> Browser
+    CopilotKitW --> CopilotKit
+    CopilotKit --> CopilotKitW
     LangGraph4JAdaptor --> LangGraph4JServer
     %%LangGraph4JServer --> Agent
     Agent --> LangGraph4JServer
     LangGraph4JServer --> LangGraph4JAdaptor
     LangGraph4JAdaptor --> CopilotKit
-    CopilotKit --> User
+    Browser --> User
     %% Legend
     %% - The User sends a request to the Copilot Kit.
     %% - The Copilot Kit processes the request and passes it to the LangGraph4J Adaptor.
