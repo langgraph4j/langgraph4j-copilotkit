@@ -16,7 +16,7 @@ import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.ollama.OllamaChatModel;
 import org.springframework.ai.ollama.api.OllamaApi;
-import org.springframework.ai.ollama.api.OllamaOptions;
+import org.springframework.ai.ollama.api.OllamaChatOptions;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
@@ -62,7 +62,7 @@ public class AGUIAgentExecutor extends AGUILangGraphAgent {
         OLLAMA_QWEN2_5_7B( () ->
                 OllamaChatModel.builder()
                         .ollamaApi( OllamaApi.builder().baseUrl("http://localhost:11434").build() )
-                        .defaultOptions(OllamaOptions.builder()
+                        .defaultOptions(OllamaChatOptions.builder()
                                 .model("qwen2.5:7b")
                                 .temperature(0.1)
                                 .build())
@@ -70,7 +70,7 @@ public class AGUIAgentExecutor extends AGUILangGraphAgent {
         OLLAMA_QWEN3_14B( () ->
                 OllamaChatModel.builder()
                 .ollamaApi( OllamaApi.builder().baseUrl("http://localhost:11434").build() )
-                .defaultOptions(OllamaOptions.builder()
+                .defaultOptions(OllamaChatOptions.builder()
                                 .model("qwen3:14b")
                                 .temperature(0.1)
                                 .build())
