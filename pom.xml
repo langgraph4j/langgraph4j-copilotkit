@@ -5,12 +5,12 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.bsc.langgraph4j</groupId>
-	<artifactId>langgraph4j-copilotkit-parent</artifactId>
+	<artifactId>langgraph4j-ag-ui-parent</artifactId>
 	<version>0.0.2-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-	<name>langgraph4j::ag-ui::copilotkit::parent</name>
-	<description>Langgraph4j integrate AG-UI protocol using CopilotKit</description>
+	<name>langgraph4j::ag-ui::parent</name>
+	<description>Langgraph4j integrate AG-UI protocol</description>
 	
 	<url>https://github.com/langgraph4j/langgraph4j-copilotkit</url>
 	<licenses>
@@ -39,7 +39,8 @@
 	</build>
 
 	<modules>
-		<module>langgraph4j/copilotkit</module>
+		<module>langgraph4j-ag-ui-impl</module>
+		<module>langgraph4j-ag-ui-sdk</module>
 		<module>ag-ui/sdks/community/java</module>
 	</modules>
 </project>
