@@ -1,1 +1,1 @@
-mvn clean install -Dgpg.skip -Plocal
+mvn clean install -Dgpg.skip -Dmaven.javadoc.skip -Plocal
