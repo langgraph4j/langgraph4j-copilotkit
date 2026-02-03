@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: langgraph4j::ag-ui
+  main:
+    web-application-type: reactive
+agui:
+  agent: agentExecutor
+  #agent: sample
