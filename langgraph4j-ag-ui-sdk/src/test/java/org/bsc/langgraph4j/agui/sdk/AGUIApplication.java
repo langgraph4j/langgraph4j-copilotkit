@@ -1,6 +1,5 @@
 package org.bsc.langgraph4j.agui.sdk;
 
-import com.agui.core.agent.Agent;
 import com.agui.json.ObjectMapperFactory;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.StreamReadFeature;
