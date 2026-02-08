@@ -1,5 +1,4 @@
 "use client";
-import { CopilotSidebar } from "@copilotkit/react-ui";
 import { useCoAgent } from "@copilotkit/react-core"; 
 import { SimpleChatWithApproval } from "./component/chatApproval";
 
@@ -7,7 +6,7 @@ export default function Page() {
   const { state, setState } = useCoAgent<any>({ 
     name: "agent",
     // optionally provide a type-safe initial state
-    initialState: { language: "spanish" }  
+    initialState: { language: "english" }  
   });
 
   const toggleLanguage = () => {
@@ -22,14 +21,7 @@ export default function Page() {
       <button onClick={toggleLanguage}>Toggle Language</button>
 
       <SimpleChatWithApproval/>
-      {/*
-      <CopilotSidebar
-          instructions={"You are an AI agent called 'Instructions'. You are assisting the user as best as you can. Answer in the best way possible given the data you have."}
-            labels={{
-              title: "Your Assistant",
-              initial: "Hi! 👋 How can I assist you today?",
-            }}/>
-      */}
+
     </main>
   );
 }
