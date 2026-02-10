@@ -7,9 +7,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @SpringBootApplication
 public class AGUIApplication {
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public interface ToolParametersMixin {
+    }
 
     @Bean
     public ObjectMapper objectMapper() {
@@ -17,15 +22,11 @@ public class AGUIApplication {
         .enable(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION)
         .build();
         var result = new ObjectMapper(factory);
+        result.addMixIn(com.agui.core.tool.Tool.ToolParameters.class, ToolParametersMixin.class);
         ObjectMapperFactory.addMixins(result);
         return result;
     }
 
-    @Bean
-    AGUIAbstractLangGraphAgent createAgentExecutor(ObjectMapper objectMapper) {
-
-        return new AGUIAgentExecutor();
-    }
 
     public static void main(String[] args) {
             SpringApplication.run(AGUIApplication.class, args);

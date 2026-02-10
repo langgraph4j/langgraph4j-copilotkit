@@ -3,6 +3,36 @@ spring:
     name: langgraph4j::ag-ui
 #  main:
 #    web-application-type: reactive
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: false
+  ai:
+    mcp:
+      client:
+        enabled: true
+        name: basic-vanillajs
+        #      version: 1.0.0
+        #      request-timeout: 30s
+        type: SYNC  # or ASYNC for reactive applications
+        streamable-http:
+          connections:
+            server1:
+              url: http://localhost:8081
+              endpoint: /mcp
+        stdio:
+#          root-change-notification: false
+#          connections:
+#            server1:
+#              command: npx
+#              args:
+#                - '-y'
+#                - '--silent'
+#                - '-registry=https://registry.npmjs.org/'
+#                - '@modelcontextprotocol/server-basic-vanillajs'
+#                - '--stdio'
+#              env:
+#                DEBUG: true
+
 agui:
   agent: agentExecutor
 #  agent: sample

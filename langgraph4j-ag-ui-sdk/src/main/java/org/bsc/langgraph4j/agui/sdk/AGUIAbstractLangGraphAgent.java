@@ -12,8 +12,7 @@ import org.bsc.langgraph4j.state.AgentState;
 import org.bsc.langgraph4j.streaming.StreamingOutput;
 import org.bsc.langgraph4j.utils.TryFunction;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
+import reactor.core.publisher.FluxSink;
 
 import java.util.Collection;
 import java.util.List;
@@ -22,13 +21,13 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static java.util.Objects.requireNonNull;
 import static org.bsc.langgraph4j.utils.CollectionsUtils.lastOf;
 
 public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
 
 
     private final Map<String, GraphData> graphByThread = new ConcurrentHashMap<>();
-    private final AtomicReference<String> streamingId = new AtomicReference<>();
 
     protected abstract GraphData buildStateGraph() throws GraphStateException;
 
@@ -36,28 +35,98 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
 
     protected abstract <S extends AgentState> List<Approval> onInterruption(RunAgentParameters input, InterruptionMetadata<S> state);
 
+    protected abstract Optional<ToolCallRequestData> isToolCallRequest( NodeOutput<? extends AgentState> output );
+    protected abstract Optional<ToolCallResultData> isToolCallResult( NodeOutput<? extends AgentState> output );
+
     protected String newMessageId() {
         return String.valueOf(System.currentTimeMillis());
     }
 
-    protected Optional<String> nodeOutputToText(NodeOutput<? extends AgentState> output) {
-        return Optional.empty();
+
+    class StreamingTracking {
+        final AtomicReference<String> currentMessageId = new AtomicReference<>();
+
+        boolean process(RunAgentParameters input, NodeOutput<? extends AgentState> event, FluxSink<BaseEvent> emitter ) {
+            if (event instanceof StreamingOutput<? extends AgentState> output) {
+                var messageId = currentMessageId.get();
+                if (messageId == null) {
+                    log.trace("STREAMING START");
+                    messageId = currentMessageId.updateAndGet(v -> newMessageId());
+                    emitter.next(EventFactory.runStartedEvent(input.getThreadId(), input.getRunId()));
+                    emitter.next(EventFactory.textMessageStartEvent(messageId, Role.assistant.name()));
+                }
+
+                if (output.chunk() == null || output.chunk().isEmpty()) {
+                    log.trace("STREAMING CHUNK IS EMPTY");
+                } else {
+                    log.trace("{}", output.chunk());
+                    emitter.next(EventFactory.textMessageContentEvent(messageId, output.chunk()));
+                }
+                return true;
+            }
+
+            var messageId = currentMessageId.get();
+            if (messageId != null) {
+                log.trace("STREAMING END");
+                emitter.next(EventFactory.textMessageEndEvent(messageId));
+                emitter.next(EventFactory.runFinishedEvent(input.getThreadId(), input.getRunId()));
+                currentMessageId.set(null);
+                return true;
+            }
+
+            return false;
+        }
+
     }
 
+    class ToolTracking {
+        final AtomicReference<String> currentMessageId = new AtomicReference<>();
 
-    protected Collection<? extends BaseEvent> nodeOutputToEvents(RunAgentParameters input, NodeOutput<? extends AgentState> output) {
-        return nodeOutputToText(output)
-                .map(text -> {
-                    var messageId = newMessageId();
+        private Collection<? extends BaseEvent> toolRequestEvents( RunAgentParameters input, String messageId, ToolCallRequestData tollCallData ) {
+            return List.of(
+                    EventFactory.runStartedEvent(input.getThreadId(), input.getRunId()),
+                    EventFactory.toolCallStartEvent(
+                            requireNonNull(messageId, "messageId cannot be null"),
+                            tollCallData.toolName(),
+                            tollCallData.toolId()),
+                    EventFactory.toolCallArgsEvent(
+                            tollCallData.toolArgs(),
+                            tollCallData.toolId()),
+                    EventFactory.toolCallEndEvent(tollCallData.toolId()));
 
-                    return List.of(
-                            EventFactory.textMessageStartEvent(messageId, Role.assistant.name()),
-                            EventFactory.textMessageContentEvent(messageId, text),
-                            EventFactory.textMessageEndEvent(messageId));
-                })
-                .orElseGet(List::of);
+        }
+        protected final Collection<? extends BaseEvent> toolResponseEvents( RunAgentParameters input, String messageId, ToolCallResultData data ) {
+            return List.of(
+                    EventFactory.toolCallResultEvent(
+                            data.toolCallId(),
+                            data.content(),
+                            requireNonNull(messageId, "messageId cannot be null"),
+                            data.role()),
+                    EventFactory.runFinishedEvent(input.getThreadId(), input.getRunId()));
+
+
+        }
+
+        void process(RunAgentParameters input, NodeOutput<? extends AgentState> event, FluxSink<BaseEvent> emitter ) {
+            final var toolCallRequestOptional = isToolCallRequest( event);
+            if( toolCallRequestOptional.isPresent() ) {
+                toolRequestEvents( input,
+                        currentMessageId.updateAndGet(v -> newMessageId()),
+                        toolCallRequestOptional.get() ).forEach(emitter::next);
+                return;
+            }
+
+            final var toolCallResultOptional = isToolCallResult( event);
+            if( toolCallResultOptional.isPresent() ) {
+                toolResponseEvents( input,
+                        currentMessageId.get(),
+                        toolCallResultOptional.get() ).forEach(emitter::next);
+                currentMessageId.set(null);
+            }
+
+        }
+
     }
-
 
 
     public final Flux<? extends BaseEvent> run(RunAgentParameters input) {
@@ -81,51 +150,33 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
                         .map(BaseMessage::getContent)
                         .orElseThrow( () -> new IllegalStateException( "last result message not found after interruption") );
 
-                //runnableConfig = agent.updateState( runnableConfig, Map.of(AgentEx.APPROVAL_RESULT_PROPERTY, lastResultMessage ));
-
                 graphInput = GraphInput.resume(Map.of(AgentEx.APPROVAL_RESULT_PROPERTY, lastResultMessage )); // resume graph
             }
             else {
                 graphInput = buildGraphInput(input);
             }
 
+            final var streamingTracking = new StreamingTracking();
+            final var toolTracking = new ToolTracking();
+
+            final AtomicReference<String> toolMessageId = new AtomicReference<>();
 
             final var outputGenerator = agent.stream(graphInput, runnableConfig);
 
-            var outputFlux = Flux.<BaseEvent>create(emitter -> {
+            return Flux.<BaseEvent>create(emitter -> {
 
                 for (var event : outputGenerator) {
 
-                    if (event instanceof StreamingOutput<? extends AgentState> output) {
-                        var messageId = streamingId.get();
-                        if (messageId == null) {
-                            log.trace("STREAMING START");
-                            messageId = streamingId.updateAndGet(v -> newMessageId());
-
-                            emitter.next(EventFactory.textMessageStartEvent(messageId, Role.assistant.name()));
-                        }
-
-                        if (output.chunk() == null || output.chunk().isEmpty()) {
-                            log.trace("STREAMING CHUNK IS EMPTY");
-                        } else {
-                            log.trace("{}", output.chunk());
-
-                            emitter.next(EventFactory.textMessageContentEvent(messageId, output.chunk()));
-                        }
-                    } else {
-
-                        var messageId = streamingId.get();
-
-                        if (messageId == null) {
-                            log.trace("NEXT:\n{}", event);
-
-                            nodeOutputToEvents(input, event).forEach(emitter::next);
-                        } else {
-                            log.trace("STREAMING END");
-                            streamingId.set(null);
-                            emitter.next(EventFactory.textMessageEndEvent(messageId));
-                        }
+                    if( event.isSTART() ) {
+                        continue;
                     }
+
+                    if( streamingTracking.process( input, event, emitter ) || event.isEND() )  {
+                        continue;
+                    }
+
+                    toolTracking.process( input, event, emitter );
+
                 }
 
                 final var result = GraphResult.from(outputGenerator);
@@ -171,7 +222,11 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
 
                 emitter.complete();
 
-            });
+            })
+            //.subscribeOn(Schedulers.immediate());
+            ;
+
+            /*
             return Mono.<BaseEvent>just(
                             EventFactory.runStartedEvent(input.getThreadId(), input.getRunId())
                     )
@@ -179,7 +234,7 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
                     .concatWith(
                             Mono.<BaseEvent>just(
                                     EventFactory.runFinishedEvent(input.getThreadId(), input.getRunId())));
-
+            */
         } catch (Exception e) {
             return Flux.error(e);
         }
