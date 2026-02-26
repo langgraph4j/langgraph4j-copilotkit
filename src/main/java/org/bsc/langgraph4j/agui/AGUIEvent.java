@@ -85,7 +85,7 @@ public interface AGUIEvent {
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
             //@JsonProperty("raw_event") Object rawEvent,
-            @JsonProperty("message_id") String messageId,
+            @JsonProperty("messageId") String messageId,
             @JsonProperty("role") String role
     ) implements AGUIEvent {
         public TextMessageStartEvent {
@@ -108,7 +108,7 @@ public interface AGUIEvent {
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
             //@JsonProperty("raw_event") Object rawEvent,
-            @JsonProperty("message_id") String messageId,
+            @JsonProperty("messageId") String messageId,
             @JsonProperty("delta") String delta
     ) implements AGUIEvent {
         public TextMessageContentEvent {
@@ -131,7 +131,7 @@ public interface AGUIEvent {
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
             //@JsonProperty("raw_event") Object rawEvent,
-            @JsonProperty("message_id") String messageId
+            @JsonProperty("messageId") String messageId
     ) implements AGUIEvent {
         public TextMessageEndEvent {
             Objects.requireNonNull(messageId, "messageId cannot be null");
@@ -149,9 +149,9 @@ public interface AGUIEvent {
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
             //@JsonProperty("raw_event") Object rawEvent,
-            @JsonProperty("tool_call_id") String toolCallId,
-            @JsonProperty("tool_call_name") String toolCallName,
-            @JsonProperty("parent_message_id") String parentMessageId // Optional
+            @JsonProperty("toolCallId") String toolCallId,
+            @JsonProperty("toolCallName") String toolCallName,
+            @JsonProperty("parentMessageId") String parentMessageId // Optional
     ) implements AGUIEvent {
         public ToolCallStartEvent {
             Objects.requireNonNull(toolCallId, "toolCallId cannot be null");
@@ -170,8 +170,8 @@ public interface AGUIEvent {
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
             //@JsonProperty("raw_event") Object rawEvent,
-            @JsonProperty("tool_call_id") String toolCallId,
-            @JsonProperty("tool_call_args") String args
+            @JsonProperty("toolCallId") String toolCallId,
+            @JsonProperty("delta") String args
     ) implements AGUIEvent {
         public ToolCallArgsEvent {
             Objects.requireNonNull(toolCallId, "toolCallId cannot be null");
@@ -190,7 +190,7 @@ public interface AGUIEvent {
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
             //@JsonProperty("raw_event") Object rawEvent,
-            @JsonProperty("tool_call_id") String toolCallId
+            @JsonProperty("toolCallId") String toolCallId
     ) implements AGUIEvent {
         public ToolCallEndEvent {
             Objects.requireNonNull(toolCallId, "toolCallId cannot be null");
@@ -208,9 +208,9 @@ public interface AGUIEvent {
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
             //@JsonProperty("raw_event") Object rawEvent,
-            @JsonProperty("tool_call_id") String toolCallId,         // Optional
-            @JsonProperty("tool_call_name") String toolCallName,     // Optional
-            @JsonProperty("parent_message_id") String parentMessageId, // Optional
+            @JsonProperty("toolCallId") String toolCallId,         // Optional
+            @JsonProperty("toolCallName") String toolCallName,     // Optional
+            @JsonProperty("parentMessageId") String parentMessageId, // Optional
             @JsonProperty("delta") String delta                      // Optional
     ) implements AGUIEvent {
         public ToolCallChunkEvent {
@@ -303,8 +303,8 @@ public interface AGUIEvent {
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
             //@JsonProperty("raw_event") Object rawEvent,
-            @JsonProperty("thread_id") String threadId,
-            @JsonProperty("run_id") String runId
+            @JsonProperty("threadId") String threadId,
+            @JsonProperty("runId") String runId
     ) implements AGUIEvent {
         public RunStartedEvent {
             Objects.requireNonNull(threadId, "threadId cannot be null");
@@ -323,8 +323,8 @@ public interface AGUIEvent {
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
             //@JsonProperty("raw_event") Object rawEvent,
-            @JsonProperty("thread_id") String threadId,
-            @JsonProperty("run_id") String runId
+            @JsonProperty("threadId") String threadId,
+            @JsonProperty("runId") String runId
     ) implements AGUIEvent {
         public RunFinishedEvent {
             Objects.requireNonNull(threadId, "threadId cannot be null");
@@ -362,7 +362,7 @@ public interface AGUIEvent {
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
             //@JsonProperty("raw_event") Object rawEvent,
-            @JsonProperty("step_name") String stepName
+            @JsonProperty("stepName") String stepName
     ) implements AGUIEvent {
         public StepStartedEvent {
             Objects.requireNonNull(stepName, "stepName cannot be null");
@@ -380,7 +380,7 @@ public interface AGUIEvent {
             @JsonProperty("type") EventType type,
             @JsonProperty("timestamp") Long timestamp,
             //@JsonProperty("raw_event") Object rawEvent,
-            @JsonProperty("step_name") String stepName
+            @JsonProperty("stepName") String stepName
     ) implements AGUIEvent {
         public StepFinishedEvent {
             Objects.requireNonNull(stepName, "stepName cannot be null");

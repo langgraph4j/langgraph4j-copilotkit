@@ -1,9 +1,9 @@
-import { 
-  CopilotRuntimeChatCompletionRequest, 
-  CopilotRuntimeChatCompletionResponse, 
-  CopilotServiceAdapter 
-} from "@copilotkit/runtime";
-import { randomUUID } from "@copilotkit/shared";
+import {
+  CopilotRuntimeChatCompletionRequest,
+  CopilotRuntimeChatCompletionResponse,
+  CopilotServiceAdapter,
+} from '@copilotkit/runtime';
+import { randomUUID } from '@copilotkit/shared';
 
 /**
  * Base interface for common properties in all server-sent events.
@@ -27,7 +27,7 @@ interface RunStarted extends BaseMessage {
 interface TextMessageStart extends BaseMessage {
   type: 'TEXT_MESSAGE_START';
   message_id: string;
-  role: 'assistant' | 'user';  // Add other roles if needed
+  role: 'assistant' | 'user'; // Add other roles if needed
 }
 
 /**
@@ -85,49 +85,56 @@ interface ToolCallArgs extends BaseMessage {
 /**
  * Union type for all possible server-sent event message types from the LangGraph4j backend.
  */
-type Message = RunStarted | TextMessageStart | TextMessageContent | TextMessageEnd | RunFinished | ToolCallStart | ToolCallEnd | ToolCallArgs;
+type Message =
+  | RunStarted
+  | TextMessageStart
+  | TextMessageContent
+  | TextMessageEnd
+  | RunFinished
+  | ToolCallStart
+  | ToolCallEnd
+  | ToolCallArgs;
 
+async function* fetchMessages(
+  reader: ReadableStreamDefaultReader<string>,
+): AsyncGenerator<Message> {
+  let buffer = '';
 
-async function *fetchMessages( reader: ReadableStreamDefaultReader<string> ): AsyncGenerator<Message> {
-      let buffer = ''
+  const { done, value } = await reader.read();
 
-      const { done, value } = await reader.read();
+  if (done) {
+    return;
+  }
 
-      if (done) {
-        return;
+  buffer += value;
+
+  // Split buffer by newlines and process complete messages
+  const lines = buffer.split('\n');
+  const lastLine = lines.pop(); // Keep the last incomplete line in buffer
+
+  const regex = /^data:(.+)$/m;
+
+  for (const line of lines) {
+    const match = line.match(regex);
+    if (match) {
+      yield JSON.parse(match[1]);
+    }
+  }
+
+  if (lastLine) {
+    const m = lastLine.match(regex);
+    if (m) {
+      try {
+        yield JSON.parse(m[1]);
+        buffer = ''; // Clear buffer
+      } catch (error) {
+        buffer = lastLine; // Keep the last line in buffer for next iteration
+        console.warn('fetch is incomplete. LastLine :', lastLine);
       }
-
-      buffer += value;
-
-      // Split buffer by newlines and process complete messages
-      const lines = buffer.split('\n');
-      const lastLine = lines.pop(); // Keep the last incomplete line in buffer
-
-      const regex = /^data:(.+)$/m;
-
-      for (const line of lines) {
-        const match = line.match(regex);
-        if (match) {
-          yield JSON.parse(match[1]);
-        }
-      }
-
-      if( lastLine ) {
-        const m = lastLine.match(regex);
-        if (m) {
-          try {
-            yield JSON.parse(m[1]);
-            buffer = ''; // Clear buffer
-          } catch (error) {
-            buffer = lastLine; // Keep the last line in buffer for next iteration
-            console.warn("fetch is incomplete. LastLine :", lastLine);
-          }
-        }
-      }
-      else {
-        buffer = ''; // Clear buffer if no last line
-      }
-
+    }
+  } else {
+    buffer = ''; // Clear buffer if no last line
+  }
 }
 
 /**
@@ -136,6 +143,9 @@ async function *fetchMessages( reader: ReadableStreamDefaultReader<string> ): As
  * and processing the server-sent events (SSE) stream in response.
  */
 export class Langgraph4jAdapter implements CopilotServiceAdapter {
+  // Below provider/model will fix the defaultAgent error on undefined/undefined (but then CopilotKit connects to OpenAI, not our Java BE - we need custom agent in CopilotKit 1.51+)
+  // readonly provider = 'openai'; // or "anthropic"
+  // readonly model = 'gpt-4o'; // your model
   private abortController: AbortController;
 
   /**
@@ -145,7 +155,6 @@ export class Langgraph4jAdapter implements CopilotServiceAdapter {
     this.abortController = new AbortController();
   }
 
-
   /**
    * Processes a chat completion request by forwarding it to the LangGraph4j backend
    * and streaming the response back to the CopilotKit runtime.
@@ -154,30 +163,34 @@ export class Langgraph4jAdapter implements CopilotServiceAdapter {
    * @returns {Promise<CopilotRuntimeChatCompletionResponse>} A promise that resolves with the response,
    * including the thread ID.
    */
-  async process(request: CopilotRuntimeChatCompletionRequest): Promise<CopilotRuntimeChatCompletionResponse> {
+  async process(
+    request: CopilotRuntimeChatCompletionRequest,
+  ): Promise<CopilotRuntimeChatCompletionResponse> {
+    console.debug('Processing request:', request);
 
-    console.debug( "Processing request:", request );
-    
-    const {
-      threadId: threadIdFromRequest,
-      eventSource,
-    } = request;
+    const { threadId: threadIdFromRequest, eventSource } = request;
 
     const threadId = threadIdFromRequest ?? randomUUID();
 
+    console.log('threadId', threadId);
+    console.log('request', request);
+
     try {
-      const response = await fetch('http://localhost:8080/langgraph4j/copilotkit', {
-        signal: this.abortController.signal,
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'text/event-stream'
+      const response = await fetch(
+        'http://localhost:8085/langgraph4j/copilotkit',
+        {
+          signal: this.abortController.signal,
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'text/event-stream',
+          },
+          body: JSON.stringify(request),
         },
-        body: JSON.stringify(request),
+      );
 
-      });
+      console.log('BE response', response);
 
-      
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -191,53 +204,48 @@ export class Langgraph4jAdapter implements CopilotServiceAdapter {
         throw new Error('Response body is null');
       }
 
-
-      eventSource.stream(async (eventStream$) => {
-
+      await eventSource.stream(async (eventStream$) => {
         try {
-          let buffer = ''
+          let buffer = '';
 
-          const fetchMessages = ( value: string | undefined) => async function *(): AsyncGenerator<Message> {
-            
-            buffer += value;
+          const fetchMessages = (value: string | undefined) =>
+            async function* (): AsyncGenerator<Message> {
+              buffer += value;
 
-            // Split buffer by newlines and process complete messages
-            const lines = buffer.split('\n');
-            const lastLine = lines.pop(); // Keep the last incomplete line in buffer
+              // Split buffer by newlines and process complete messages
+              const lines = buffer.split('\n');
+              const lastLine = lines.pop(); // Keep the last incomplete line in buffer
 
-            const regex = /^data:(.+)$/m;
+              const regex = /^data:(.+)$/m;
 
-            for (const line of lines) {
-              const match = line.match(regex);
-              if (match) {
-                yield JSON.parse(match[1])
-              }
-            }
-
-            if( lastLine ) {
-              const m = lastLine.match(regex);
-              if (m) {
-                try {
-                  yield JSON.parse(m[1])
-                  buffer = ''; // Clear buffer
-                } catch (error) {
-                  buffer = lastLine; // Keep the last line in buffer for next iteration
-                  console.warn("fetch is incomplete. LastLine :", lastLine);
+              for (const line of lines) {
+                const match = line.match(regex);
+                if (match) {
+                  yield JSON.parse(match[1]);
                 }
               }
-            }
-            else {
-              buffer = ''; // Clear buffer if no last line
-            }
-          }
 
-          let fetchEvents = true
+              if (lastLine) {
+                const m = lastLine.match(regex);
+                if (m) {
+                  try {
+                    yield JSON.parse(m[1]);
+                    buffer = ''; // Clear buffer
+                  } catch (error) {
+                    buffer = lastLine; // Keep the last line in buffer for next iteration
+                    console.warn('fetch is incomplete. LastLine :', lastLine);
+                  }
+                }
+              } else {
+                buffer = ''; // Clear buffer if no last line
+              }
+            };
+
+          let fetchEvents = true;
 
           while (fetchEvents) {
-
             const { done, value: buffer } = await reader.read();
             const value = decoder.decode(buffer, { stream: true });
-
 
             console.debug(`Fetch value:`, done, value);
 
@@ -246,19 +254,17 @@ export class Langgraph4jAdapter implements CopilotServiceAdapter {
               break;
             }
 
-            const messageGenerator =  fetchMessages( value )
+            const messageGenerator = fetchMessages(value);
 
-            for await (const message of messageGenerator() ) {
-  
+            for await (const message of messageGenerator()) {
               console.debug(`${threadId} - Fetch message:`, message.type);
 
               switch (message.type) {
                 case 'RUN_STARTED':
-                  
                   break;
                 case 'TEXT_MESSAGE_START':
                   eventStream$.sendTextMessageStart({
-                    messageId: message.message_id
+                    messageId: message.message_id,
                   });
                   break;
                 case 'TEXT_MESSAGE_CONTENT':
@@ -300,16 +306,14 @@ export class Langgraph4jAdapter implements CopilotServiceAdapter {
                   break;
               }
             }
-
           }
         } finally {
-           console.debug("Processing messages completed:", threadId);
-           eventStream$.complete();
+          console.debug('Processing messages completed:', threadId);
+          eventStream$.complete();
         }
       });
-
     } catch (error: any) {
-      if ("name" in error && error.name === 'AbortError') {
+      if ('name' in error && error.name === 'AbortError') {
         console.warn('Fetch aborted');
       } else {
         throw error;
@@ -317,7 +321,7 @@ export class Langgraph4jAdapter implements CopilotServiceAdapter {
     }
 
     return {
-      threadId
+      threadId,
     };
   }
 }

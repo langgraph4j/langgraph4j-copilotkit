@@ -172,11 +172,14 @@ public class AGUIAgentExecutor extends AGUILangGraphAgent {
 
     @Override
     protected Optional<String> nodeOutputToText(NodeOutput<? extends AgentState> output) {
-        if( output.isEND() | output.isSTART() ) {
-            return Optional.empty();
-        }
+        return Optional.empty();
 
-        throw new UnsupportedOperationException("not implemented yet");
+        // TODO: support other than START or END in different way? (original code below throw error after Tool call)
+        // if( output.isEND() | output.isSTART() ) {
+        //     return Optional.empty();
+        // }
+
+        // throw new UnsupportedOperationException("not implemented yet");
     }
 
 

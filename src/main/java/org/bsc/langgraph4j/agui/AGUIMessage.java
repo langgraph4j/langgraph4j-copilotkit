@@ -10,17 +10,20 @@ import java.util.Objects;
 /**
  * Base interface for all AG-UI messages, facilitating polymorphic deserialization.
  */
-@JsonIgnoreProperties(ignoreUnknown = true) // Add this annotation
+@JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.EXISTING_PROPERTY, // Use existing 'role' property for dispatch
-        property = "type",
-        visible = false // Make the 'role' property accessible after deserialization
+        include = JsonTypeInfo.As.EXISTING_PROPERTY,
+        property = "role",
+        visible = true,
+        defaultImpl = AGUIMessage.TextMessage.class
 )
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = AGUIMessage.TextMessage.class, name = "TextMessage"),
-        @JsonSubTypes.Type(value = AGUIMessage.ActionExecutionMessage.class, name = "ActionExecutionMessage"),
-        @JsonSubTypes.Type(value = AGUIMessage.ResultMessage.class, name = "ResultMessage"),
+        @JsonSubTypes.Type(value = AGUIMessage.TextMessage.class, name = "user"),
+        @JsonSubTypes.Type(value = AGUIMessage.TextMessage.class, name = "assistant"),
+        @JsonSubTypes.Type(value = AGUIMessage.TextMessage.class, name = "system"),
+        @JsonSubTypes.Type(value = AGUIMessage.TextMessage.class, name = "developer"),
+        @JsonSubTypes.Type(value = AGUIMessage.ResultMessage.class, name = "tool"),
 })
 @JsonInclude(JsonInclude.Include.NON_NULL) // Excludes null fields during serialization
 public interface AGUIMessage {
@@ -59,8 +62,6 @@ public interface AGUIMessage {
         public TextMessage {
             Objects.requireNonNull(id, "id cannot be null");
             Objects.requireNonNull(role, "role cannot be null");
-            Objects.requireNonNull(content, "content cannot be null for system message");
-
         }
     }
 
@@ -88,15 +89,15 @@ public interface AGUIMessage {
     record ResultMessage(
             @JsonProperty("id") String id,
             @JsonProperty("createdAt") Date createdAt,
-            @JsonProperty("actionExecutionId") String actionExecutionId,
-            @JsonProperty("actionName") String actionName,
-            @JsonProperty("result") String result
+            @JsonProperty("toolCallId") String actionExecutionId,
+            @JsonProperty("name") String actionName,
+            @JsonProperty("content") String result
 
     ) implements AGUIMessage {
 
         public ResultMessage {
             Objects.requireNonNull(id, "id cannot be null");
-            Objects.requireNonNull(actionExecutionId, "actionExecutionId cannot be null");
+            Objects.requireNonNull(actionExecutionId, "toolCallId cannot be null");
         }
     }
 
