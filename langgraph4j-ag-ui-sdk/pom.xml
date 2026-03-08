@@ -100,13 +100,13 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
-		<!--
-                <dependency>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-test</artifactId>
-                    <scope>test</scope>
-                </dependency>
-        -->
+<!--
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+-->
 
 <!--
 		<dependency>
@@ -147,7 +147,6 @@
 			<scope>test</scope>
 		</dependency>
 
-<!--
 		<dependency>
 			<groupId>io.modelcontextprotocol.sdk</groupId>
 			<artifactId>mcp-core</artifactId>
@@ -157,7 +156,6 @@
 		<dependency>
 			<groupId>org.springframework.ai</groupId>
 			<artifactId>spring-ai-starter-mcp-client</artifactId>
-			<version>${spring-ai.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>io.modelcontextprotocol.sdk</groupId>
@@ -166,7 +164,6 @@
 			</exclusions>
 			<scope>test</scope>
 		</dependency>
--->
 
 		<dependency>
 			<groupId>org.bsc.langgraph4j</groupId>

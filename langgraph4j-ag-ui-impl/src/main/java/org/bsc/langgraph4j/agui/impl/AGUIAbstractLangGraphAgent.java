@@ -15,7 +15,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public abstract class AGUIAbstractLangGraphAgent implements AGUIAgent, LG4JLoggable {
 
-
     private final Map<String, GraphData> graphByThread = new ConcurrentHashMap<>();
 
     protected abstract GraphData buildStateGraph() throws GraphStateException;
@@ -87,10 +86,19 @@ public abstract class AGUIAbstractLangGraphAgent implements AGUIAgent, LG4JLogga
 
                     if (event instanceof StreamingOutput<? extends AgentState> output) {
                         var messageId = streamingId.get();
+
                         if(messageId==null) {
                             log.trace( "STREAMING START");
                             messageId = streamingId.updateAndGet( v -> newMessageId() );
                             emitter.next(new AGUIEvent.TextMessageStartEvent(messageId));
+                            continue;
+                        }
+
+                        if(output.isStreamingEnd()) {
+                            log.trace( "STREAMING END");
+                            streamingId.set(null);
+                            emitter.next(new AGUIEvent.TextMessageEndEvent(messageId));
+                            continue;
                         }
 
                         if( output.chunk() == null || output.chunk().isEmpty()) {
@@ -102,19 +110,9 @@ public abstract class AGUIAbstractLangGraphAgent implements AGUIAgent, LG4JLogga
                         }
                     } else {
 
-                        var messageId = streamingId.get();
-
-                        if( messageId == null ) {
                             log.trace( "NEXT:\n{}", event);
-
                             nodeOutputToEvents(input, event).forEach( emitter::next );
-                        }
-                        else {
-                            log.trace("STREAMING END");
-                            streamingId.set(null);
-                            emitter.next(new AGUIEvent.TextMessageEndEvent(messageId));
-                        }
-                    }
+                   }
 
                 }
 

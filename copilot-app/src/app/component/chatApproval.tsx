@@ -1,7 +1,7 @@
 "use client";
 import { useCopilotAction } from "@copilotkit/react-core";
-import { CopilotSidebar } from "@copilotkit/react-core/v2";
- 
+import { CopilotSidebar } from "@copilotkit/react-ui";
+
 export function SimpleChatWithApproval() {
   
 
@@ -52,7 +52,9 @@ export function SimpleChatWithApproval() {
   // <CopilotChat />
 
   return (
-    <CopilotSidebar/>
+    <main>
+      <CopilotSidebar/>
+    </main>
   );
 
 }

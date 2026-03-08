@@ -11,15 +11,14 @@ import org.bsc.langgraph4j.agent.AgentEx;
 import org.bsc.langgraph4j.state.AgentState;
 import org.bsc.langgraph4j.streaming.StreamingOutput;
 import org.bsc.langgraph4j.utils.TryFunction;
+import org.springframework.web.servlet.function.ServerResponse;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 import static org.bsc.langgraph4j.utils.CollectionsUtils.lastOf;
@@ -33,10 +32,8 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
 
     protected abstract GraphInput buildGraphInput(RunAgentParameters input);
 
-    protected abstract <S extends AgentState> List<Approval> onInterruption(RunAgentParameters input, InterruptionMetadata<S> state);
-
-    protected abstract Optional<ToolCallRequestData> isToolCallRequest( NodeOutput<? extends AgentState> output );
-    protected abstract Optional<ToolCallResultData> isToolCallResult( NodeOutput<? extends AgentState> output );
+    protected abstract Optional<ToolCallData> isToolCall( NodeOutput<? extends AgentState> output );
+    protected abstract Optional<ToolCallData> isToolCall( InterruptionMetadata<? extends AgentState> output );
 
     protected String newMessageId() {
         return String.valueOf(System.currentTimeMillis());
@@ -71,7 +68,6 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
                 emitter.next(EventFactory.textMessageEndEvent(messageId));
                 emitter.next(EventFactory.runFinishedEvent(input.getThreadId(), input.getRunId()));
                 currentMessageId.set(null);
-                return true;
             }
 
             return false;
@@ -82,48 +78,83 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
     class ToolTracking {
         final AtomicReference<String> currentMessageId = new AtomicReference<>();
 
-        private Collection<? extends BaseEvent> toolRequestEvents( RunAgentParameters input, String messageId, ToolCallRequestData tollCallData ) {
-            return List.of(
-                    EventFactory.runStartedEvent(input.getThreadId(), input.getRunId()),
-                    EventFactory.toolCallStartEvent(
+        private Stream<? extends BaseEvent> toolRequestEvents(RunAgentParameters input, String messageId, ToolCallData toolCallData ) {
+            final var request = requireNonNull(toolCallData.request(), "request cannot be null");
+
+            return  Stream.<BaseEvent>builder()
+                    .add( EventFactory.runStartedEvent(input.getThreadId(), input.getRunId()) )
+                    .add( EventFactory.toolCallStartEvent(
                             requireNonNull(messageId, "messageId cannot be null"),
-                            tollCallData.toolName(),
-                            tollCallData.toolId()),
-                    EventFactory.toolCallArgsEvent(
-                            tollCallData.toolArgs(),
-                            tollCallData.toolId()),
-                    EventFactory.toolCallEndEvent(tollCallData.toolId()));
+                            request.toolName(),
+                            request.toolId()))
+                    .add( EventFactory.toolCallArgsEvent(
+                            request.toolArgs(),
+                            request.toolId()))
+                    .add( EventFactory.toolCallEndEvent(request.toolId()))
+                    .build()
+                    ;
 
         }
-        protected final Collection<? extends BaseEvent> toolResponseEvents( RunAgentParameters input, String messageId, ToolCallResultData data ) {
-            return List.of(
+        private Stream<? extends BaseEvent> toolResponseEvents( RunAgentParameters input, String messageId, ToolCallData toolCallData ) {
+            if( messageId == null ) {
+                return Stream.empty();
+            }
+            final var response = requireNonNull( toolCallData.response(), "response cannot be null");
+            return Stream.of(
                     EventFactory.toolCallResultEvent(
-                            data.toolCallId(),
-                            data.content(),
-                            requireNonNull(messageId, "messageId cannot be null"),
-                            data.role()),
+                            response.toolCallId(),
+                            response.content(),
+                            messageId,
+                            response.role()),
                     EventFactory.runFinishedEvent(input.getThreadId(), input.getRunId()));
 
 
         }
 
+
         void process(RunAgentParameters input, NodeOutput<? extends AgentState> event, FluxSink<BaseEvent> emitter ) {
-            final var toolCallRequestOptional = isToolCallRequest( event);
-            if( toolCallRequestOptional.isPresent() ) {
-                toolRequestEvents( input,
-                        currentMessageId.updateAndGet(v -> newMessageId()),
-                        toolCallRequestOptional.get() ).forEach(emitter::next);
+            final var toolCallOptional = isToolCall( event );
+
+            if( toolCallOptional.isEmpty() ) {
                 return;
             }
 
-            final var toolCallResultOptional = isToolCallResult( event);
-            if( toolCallResultOptional.isPresent() ) {
+            final var toolCall = toolCallOptional.get();
+
+            if( toolCall.request()!=null && currentMessageId.get() == null ) {
+                toolRequestEvents( input,
+                        currentMessageId.updateAndGet(v -> newMessageId()),
+                        toolCall ).forEach(emitter::next);
+            } else if( toolCall.response()!=null ) {
                 toolResponseEvents( input,
                         currentMessageId.get(),
-                        toolCallResultOptional.get() ).forEach(emitter::next);
+                        toolCall ).forEach(emitter::next);
                 currentMessageId.set(null);
             }
 
+        }
+
+        void  process(RunAgentParameters input, InterruptionMetadata<? extends AgentState> event, FluxSink<BaseEvent> emitter ) {
+            final var toolCallOptional = isToolCall( event );
+
+            if( toolCallOptional.isEmpty() ) {
+                return;
+            }
+
+            final var toolCall = toolCallOptional.get();
+
+            if( toolCall.request()!=null ) {
+                toolRequestEvents(input, currentMessageId.updateAndGet(v -> newMessageId()), toolCall)
+                        .forEach(emitter::next);
+            }
+            if( toolCall.response()!=null ) {
+                toolResponseEvents(input, currentMessageId.get(), toolCall)
+                        .forEach(emitter::next);
+                currentMessageId.set(null);
+            }
+            else if( toolCall.request()!=null  ) {
+                emitter.next(EventFactory.runFinishedEvent(input.getThreadId(), input.getRunId()));
+            }
         }
 
     }
@@ -159,8 +190,6 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
             final var streamingTracking = new StreamingTracking();
             final var toolTracking = new ToolTracking();
 
-            final AtomicReference<String> toolMessageId = new AtomicReference<>();
-
             final var outputGenerator = agent.stream(graphInput, runnableConfig);
 
             return Flux.<BaseEvent>create(emitter -> {
@@ -191,24 +220,7 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
 
                     graphByThread.put(input.getThreadId(), graphData.withInterruption(true));
 
-                    onInterruption(input, interruptionMetadata).forEach(approval -> {
-                        final var messageId = newMessageId();
-
-                        emitter.next(EventFactory.toolCallStartEvent(
-                                messageId,
-                                approval.toolName(),
-                                approval.toolId()
-                                ));
-
-                        emitter.next(EventFactory.toolCallArgsEvent(
-                                approval.toolArgs(),
-                                approval.toolId()
-                                ));
-
-                        emitter.next(EventFactory.toolCallEndEvent(
-                                approval.toolId()));
-
-                    });
+                    toolTracking.process(input, interruptionMetadata, emitter);
 
                 } else {
                     graphByThread.put(input.getThreadId(), graphData.withInterruption(false));

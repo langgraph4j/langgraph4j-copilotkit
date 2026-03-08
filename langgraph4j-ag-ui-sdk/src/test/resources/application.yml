@@ -17,7 +17,7 @@ spring:
         streamable-http:
           connections:
             server1:
-              url: http://localhost:8081
+              url: http://localhost:3001
               endpoint: /mcp
         stdio:
 #          root-change-notification: false

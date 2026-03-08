@@ -3,47 +3,51 @@ import {
   ExperimentalEmptyAdapter,
   copilotRuntimeNextJSAppRouterEndpoint,
 } from "@copilotkit/runtime";
-import { BuiltInAgent } from "@copilotkit/runtime/v2";
+
 import { NextRequest } from "next/server";
-import { MCPAppsMiddleware } from "@ag-ui/mcp-apps-middleware";
+import { HttpAgent } from "@ag-ui/client";
 
-// 1. Define the agent middleware
-const middlewares = [
-  // 1.1. MCP Apps Middleware
-  new MCPAppsMiddleware({
-    mcpServers: [
-      {
-        type: "http",
-        url: "http://localhost:3001/mcp",
-        serverId: "time-server" // Recommended: stable identifier
-      },
-    ],
-  }),
-  // 1.2. More middlewares can be added here
-]
+// 1. Base address for the Mastra server
+const HTTP_URL = process.env.HTTP_URL || "http://localhost:8080/sse/1";
 
-// 2. Create the agent
-const agent = new BuiltInAgent({
-  model: "openai/gpt-4o-mini",
-  prompt: "You are a helpful assistant.",
-})
-
-// 3. Apply the middleware to the agent
-for (const middleware of middlewares) {
-  agent.use(middleware as any)
-}
-
-// 4. Create the service adapter, empty if not relevant
+// 2. You can use any service adapter here for multi-agent support. We use
+//    the empty adapter since we're only using one agent.
 const serviceAdapter = new ExperimentalEmptyAdapter();
 
-// 5. Create the runtime
+
+const httpAgent = new HttpAgent({
+    url: HTTP_URL,
+    initialState: {
+      'language': 'NL'
+    },
+    initialMessages: [
+      {
+        id: '1',
+        role: 'user',
+        content: 'Initial message of the user'
+      },
+      {
+        id: '2',
+        role: 'assistant',
+        content: 'Hi user!'
+      }
+    ]
+    
+}).use(   
+  (input, next) => {
+    console.log("Starting run:", input.runId);
+    return next.run(input);
+  },
+)
+
+
 const runtime = new CopilotRuntime({
   agents: {
-    'agent': agent as any,
-  },
+      'agent': httpAgent as any
+  }
 });
 
-// 6. Create the API route
+// 4. Build a Next.js API route that handles the CopilotKit runtime requests.
 export const POST = async (req: NextRequest) => {
   const { handleRequest } = copilotRuntimeNextJSAppRouterEndpoint({
     runtime,
