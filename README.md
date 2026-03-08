@@ -65,7 +65,7 @@ mvn package spring-boot:test-run -pl langgraph4j-ag-ui-sdk
 ### Start CopilotKit App
 
 ```bash
-cd webui
+cd copilot-app
 npm run dev
 ```
 
