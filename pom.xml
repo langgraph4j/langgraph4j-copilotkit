@@ -3,16 +3,15 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>org.bsc.langgraph4j</groupId>
-		<artifactId>langgraph4j-parent</artifactId>
-		<version>1.6.2</version>
-	</parent>
 
-	<artifactId>langgraph4j-copilotkit</artifactId>
-	<version>0.0.1</version>
-	<name>langgraph4j::ag-ui::copilotkit</name>
-	<description>Langgraph4j integrate AG-UI protocol using CopilotKit</description>
+	<groupId>org.bsc.langgraph4j</groupId>
+	<artifactId>langgraph4j-ag-ui-parent</artifactId>
+	<version>0.0.2</version>
+	<packaging>pom</packaging>
+
+	<name>langgraph4j::ag-ui::parent</name>
+	<description>Langgraph4j integrate AG-UI protocol</description>
+	
 	<url>https://github.com/langgraph4j/langgraph4j-copilotkit</url>
 	<licenses>
 		<license>
@@ -26,166 +25,22 @@
 		</developer>
 	</developers>
 	
-	<!-- <scm>
-		<connection />
-		<developerConnection />
-		<tag />
-		<url />
-	</scm> -->
 	<properties>
-		<java.version>17</java.version>
-		<spring-ai.version>1.0.0</spring-ai.version>
 	</properties>
 
 	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-starter-parent</artifactId>
-				<version>3.5.0</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
 	</dependencyManagement>
+
+
 	<dependencies>
-		<dependency>
-			<groupId>${project.parent.groupId}</groupId>
-			<artifactId>langgraph4j-core</artifactId>
-			<version>${project.parent.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-webflux</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.projectreactor</groupId>
-			<artifactId>reactor-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.ai</groupId>
-			<artifactId>spring-ai-commons</artifactId>
-			<version>${spring-ai.version}</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.ai</groupId>
-			<artifactId>spring-ai-model</artifactId>
-			<version>${spring-ai.version}</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.ai</groupId>
-			<artifactId>spring-ai-client-chat</artifactId>
-			<version>${spring-ai.version}</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.ai</groupId>
-			<artifactId>spring-ai-ollama</artifactId>
-			<version>${spring-ai.version}</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.ai</groupId>
-			<artifactId>spring-ai-openai</artifactId>
-			<version>${spring-ai.version}</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>${project.parent.groupId}</groupId>
-			<artifactId>langgraph4j-spring-ai</artifactId>
-			<version>${project.parent.version}</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>${project.parent.groupId}</groupId>
-			<artifactId>langgraph4j-springai-agentexecutor</artifactId>
-			<version>${project.parent.version}</version>
-			<scope>test</scope>
-		</dependency>
-
-		<!--
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-jdk14</artifactId>
-			<scope>test</scope>
-		</dependency>
-		-->
-
-
 	</dependencies>
 
 	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-
-			<plugin>
-				<groupId>org.sonatype.central</groupId>
-				<artifactId>central-publishing-maven-plugin</artifactId>
-				<version>0.8.0</version>
-				<extensions>true</extensions>
-				<configuration>
-					<publishingServerId>sonatype-central</publishingServerId>
-					<autoPublish>true</autoPublish>
-					<waitUntil>published</waitUntil>
-				</configuration>
-			</plugin>
-
-		</plugins>
 	</build>
 
-	<repositories>
-		<repository>
-			<id>sonatype-central</id>
-			<name>sonatype snapshots</name>
-			<url>https://central.sonatype.com/repository/maven-snapshots/</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-		</repository>
-	</repositories>
-
-	<profiles>
-		<profile>
-			<id>macos-dns-native</id>
-			<activation>
-				<os>
-					<family>mac</family>
-					<arch>aarch64</arch>
-				</os>
-			</activation>
-			<dependencies>
-				<dependency>
-					<groupId>io.netty</groupId>
-					<artifactId>netty-resolver-dns-native-macos</artifactId>
-					<version>4.1.115.Final</version>
-					<classifier>osx-aarch_64</classifier>
-					<scope>runtime</scope>
-				</dependency>
-			</dependencies>
-		</profile>
-	</profiles>
-
+	<modules>
+	<!--<module>langgraph4j-ag-ui-impl</module>-->
+		<module>langgraph4j-ag-ui-sdk</module>
+		<module>ag-ui/sdks/community/java</module>
+	</modules>
 </project>

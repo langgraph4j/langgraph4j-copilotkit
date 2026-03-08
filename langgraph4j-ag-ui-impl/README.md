@@ -1,6 +1,6 @@
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg) [![Static Badge](https://img.shields.io/badge/maven--snapshots-0.0.2--SNAPSHOT-blue)][snapshots] [![Maven Central](https://img.shields.io/maven-central/v/org.bsc.langgraph4j/langgraph4j-copilotkit.svg)][releases][![discord](https://img.shields.io/discord/1364514593765986365?logo=discord&style=flat)](https://discord.gg/szVVztSYKh)
 
-# LangGraph4j support for CopilotKit
+# LangGraph4j support for AG-UI (DEPRECATED)
 
 Make [LangGraph4j] compliant with [AG-UI protocol][AG-UI] with [CopilotKit] integration
 
@@ -44,18 +44,12 @@ flowchart LR
     %% - Finally, the Copilot Kit presents the results back to the User.
 
 ```
-## Tech. Stack
-
-* [AG-UI community sdk for java version `0.0.1`](https://github.com/ag-ui-protocol/ag-ui/tree/main/sdks/community/java)
-* [LangGraph4j `1.8.7`](https://github.com/langgraph4j/langgraph4j)
-* [CopilotKit `1.53.0`](https://www.copilotkit.ai)
-
 ## Getting Started
 
 ### Start LangGraph4j Agent
 
 ```bash
-mvn package spring-boot:test-run -pl langgraph4j-ag-ui-sdk
+mvn package spring-boot:test-run
 ```
 
 ### Start CopilotKit App
