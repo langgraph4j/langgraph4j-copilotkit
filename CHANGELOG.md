@@ -2,6 +2,117 @@
 
 
 
+<!-- "name: v0.0.2" is a release tag -->
+
+## [v0.0.2](https://github.com/bsorrentino/langgraph4j/releases/tag/v0.0.2) (2026-03-08)
+
+### Features
+
+ *  add new module 'langgraph4j-ag-ui-sdk' with ag-ui sdk integration ([afe040bd8c4e7f1](https://github.com/bsorrentino/langgraph4j/commit/afe040bd8c4e7f104a750ce2a4eeff94581f5a35))
+     > add the modern copilotkit app for testing integration
+     > resolve #3
+   
+
+
+### Documentation
+
+ -  update project readme ([1f8322bf1dad550](https://github.com/bsorrentino/langgraph4j/commit/1f8322bf1dad550309c62f4c776bf8a6565e3a5f))
+
+ -  **langgraph4j-ag-ui-sdk**  add README ([8f85002ad46e976](https://github.com/bsorrentino/langgraph4j/commit/8f85002ad46e976b9ebb1129e5e81f7d34aac195))
+
+ -  update architectural diagram ([2d6bfd7e5b798a4](https://github.com/bsorrentino/langgraph4j/commit/2d6bfd7e5b798a494a0a6a9656b9b10faafc7505))
+
+ -  update readme ([a8327c539af469b](https://github.com/bsorrentino/langgraph4j/commit/a8327c539af469bbf55c7f9cf40258d97733735d))
+
+ -  ad changelog ([aa109841eb8498b](https://github.com/bsorrentino/langgraph4j/commit/aa109841eb8498bf56a2a8440a98f4b92396d287))
+
+
+### Refactor
+
+ -  **copilot-app/tsconfig.json**  update jsx setting to preserve ([98edea8ed1533ba](https://github.com/bsorrentino/langgraph4j/commit/98edea8ed1533ba66d1c29cf82f23fa5b6717cf2))
+   
+ -  **AGUIAbstractLangGraphAgent.java**  Improve streaming event handling by restructuring conditional logic and adding explicit stream start/end markers. ([4e275c633a88cdb](https://github.com/bsorrentino/langgraph4j/commit/4e275c633a88cdb47cee53f327e1aea1a0cabc66))
+   
+ -  **pom**  Rename parent artifact and update module structure ([7820f56d28bc89b](https://github.com/bsorrentino/langgraph4j/commit/7820f56d28bc89bcc120783f63eb4115a6135923))
+    > worn on #3
+
+ -  move previous implementation into a separate module 'langgraph4j-ag-ui-impl' ([046d9ac37e013a5](https://github.com/bsorrentino/langgraph4j/commit/046d9ac37e013a559772b60a9fb7840a3afa89cc))
+   
+ -  move previous implementation into a separate module 'langgraph4j-ag-ui-impl' ([adb652543342012](https://github.com/bsorrentino/langgraph4j/commit/adb6525433420126cd684c03171ecff12a2eaf80))
+   
+ -  **AGUILangGraphAgent**  Implement LG4JLoggable interface ([c5bf95d81798a2c](https://github.com/bsorrentino/langgraph4j/commit/c5bf95d81798a2c046c6dff340bc4afd31b9e3b9))
+    > Added LG4JLoggable interface implementation to the AGUILangGraphAgent class
+
+ -  **AGUILangGraphAgent**  Refactored method handling node output to events ([e93222f606b3787](https://github.com/bsorrentino/langgraph4j/commit/e93222f606b37872e48dd28af3eac6490c30e292))
+    > Extracted method &#x60;nodeOutputToEvents&#x60; from &#x60;nodeOutputToText&#x60; and updated &#x60;onEvent&#x60; logic to use the new method.
+
+
+### ALM 
+
+ -  bump to next version 0.0.2 ([3df8ccb0411b5f2](https://github.com/bsorrentino/langgraph4j/commit/3df8ccb0411b5f29076d4f5e7718df40c94cd2d2))
+   
+ -  Update version to 0.0.2-SNAPSHOT and remove langgraph4j-ag-ui-impl module from modules list ([ae80250c90fb560](https://github.com/bsorrentino/langgraph4j/commit/ae80250c90fb5601b0ff336a92953dd847b7d96e))
+   
+ -  **langgraph4j-ag-ui-sdk/pom.xml**  Update parent version and langgraph4j to 1.8.7 ([8e52853fda9bda9](https://github.com/bsorrentino/langgraph4j/commit/8e52853fda9bda94d8ac6ec2032bd8a70b9187f8))
+   
+ -  update ag-ui submodule ([02710cd332678f6](https://github.com/bsorrentino/langgraph4j/commit/02710cd332678f6540c2de41af0a006fd62239fd))
+   
+ -  **copilot-app/package.json**  Update dependencies and package manager to new versions ([004c46c6a51f436](https://github.com/bsorrentino/langgraph4j/commit/004c46c6a51f436df181238e6f4bc71a46f661bd))
+    > Updated @copilotkit/react-core to ^1.53.0 (was ^1.51.2)
+ > Updated @copilotkit/react-ui to ^1.53.0 (was ^1.51.2)
+ > Updated @copilotkit/runtime to ^1.53.0 (was ^1.51.2)
+ > Added @copilotkit/react-textarea 1.53.0
+ > Updated next from 15.4.6 to 15.4.8
+ > Updated packageManager
+
+ -  update ag-ui submodule ([7f34bd1e73b1762](https://github.com/bsorrentino/langgraph4j/commit/7f34bd1e73b1762bcd07e01c33def466b5c08bee))
+   
+ -  **copilot-app**  update git ignore ([f91b5451e1ec36a](https://github.com/bsorrentino/langgraph4j/commit/f91b5451e1ec36a59fed23feb9f4b3e67d530059))
+   
+ -  **copilot-app**  update tsconfig.json ([89889182838eb24](https://github.com/bsorrentino/langgraph4j/commit/89889182838eb24f2415ec5499bc95d1bef7661e))
+   
+ -  **copilot-app**  update git ignore ([c494cc8fae6c3bc](https://github.com/bsorrentino/langgraph4j/commit/c494cc8fae6c3bc52561bd9442b4096307d5dea8))
+   
+ -  **copilot-app/package.json**  add pnpm packageManager field ([0389a11a579b24e](https://github.com/bsorrentino/langgraph4j/commit/0389a11a579b24eb0761cf42c66d56d12d8c5592))
+   
+ -  update ag-ui sdk submodule ([4c9e2fd2d0c7521](https://github.com/bsorrentino/langgraph4j/commit/4c9e2fd2d0c75210e1e7c3a4d80d5f1db72118a4))
+   
+ -  add build script ([e32ceb1540b25f3](https://github.com/bsorrentino/langgraph4j/commit/e32ceb1540b25f3d73ba83c3130d44987e615375))
+   
+ -  update ag-ui sdk submodule ([7328c921c85294c](https://github.com/bsorrentino/langgraph4j/commit/7328c921c85294c03bc166467d212e529c96eb2b))
+   
+ -  update git ignore ([6f7af16ff06d9d5](https://github.com/bsorrentino/langgraph4j/commit/6f7af16ff06d9d5910b54b415afbdf657fa94c9d))
+   
+ -  add build script helping to build all ([6a8a909194f0034](https://github.com/bsorrentino/langgraph4j/commit/6a8a909194f0034a5bc67b4381c27efe8b771e6f))
+   
+ -  promote project as multi-module ([8a76ec81efaf27d](https://github.com/bsorrentino/langgraph4j/commit/8a76ec81efaf27df88161f652fb0936ff5d7f1ad))
+   
+ -  move langgraph4j copilot implementation in a dedicated module ([4c210115d4f2f4d](https://github.com/bsorrentino/langgraph4j/commit/4c210115d4f2f4d2138533e86152a65dc2e073d0))
+   
+ -  add git submodule linked to https://github.com/ag-ui-protocol/ag-ui.git for use ag-ui-sdk ([e556c558ef10a38](https://github.com/bsorrentino/langgraph4j/commit/e556c558ef10a38365c19f837afa62739ee3fa6a))
+   
+ -  **pom**  Upgrade parent version to 1.8-SNAPSHOT ([885624c72a6cf59](https://github.com/bsorrentino/langgraph4j/commit/885624c72a6cf594662958b415c04eb50abf0411))
+    > Update parent version in pom.xml to 1.8-SNAPSHOT
+
+ -  **package**  Update dependencies to newer versions ([dc667d931c27948](https://github.com/bsorrentino/langgraph4j/commit/dc667d931c27948c1fca3371a6e0802b0825eac8))
+    > Upgrade @copilotkit/react-core, @copilotkit/react-ui, @copilotkit/runtime, next, react and react-dom to latest versions
+
+ -  bump langgraph4j to version 1.7-SNAPSHOT ([eceae0fc63f0684](https://github.com/bsorrentino/langgraph4j/commit/eceae0fc63f06843d14ed856011b8e765392107f))
+   
+ -  bump to 0.0.2-SNAPSHOT ([40f79571932f73f](https://github.com/bsorrentino/langgraph4j/commit/40f79571932f73f49886ccb49216dfc3a0fda504))
+   
+
+### Test 
+
+ -  **AGUIAgentExecutor**  update AGUIAgentExecutor test to include streaming settings and remove redundant model parameter ([64bb1d22aa938e8](https://github.com/bsorrentino/langgraph4j/commit/64bb1d22aa938e8c2ec8f08e3b878405ba67bfe9))
+   
+ -  **AGUIAgentExecutor**  enable streaming and emit end event in agent executor test configuration ([c3da290461fd3a0](https://github.com/bsorrentino/langgraph4j/commit/c3da290461fd3a0560b802be02b87700c1e59a7d))
+   
+
+
+
+
+
 <!-- "name: v0.0.1" is a release tag -->
 
 ## [v0.0.1](https://github.com/bsorrentino/langgraph4j/releases/tag/v0.0.1) (2025-09-02)
