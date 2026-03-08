@@ -37,7 +37,9 @@ public class AGUIAgentExecutor extends AGUIAbstractLangGraphAgent {
                             .orElseGet( AIModel.OLLAMA_QWEN2_5_7B.model ));
 
         var agent =  AgentExecutorEx.builder()
-                .chatModel(model, true)
+                .chatModel(model)
+                .streaming(true)
+                .emitStreamingEnd(true)
                 .toolsFromObject(new Tools())
                 .approvalOn( "sendEmail",
                          (nodeId, state ) ->
