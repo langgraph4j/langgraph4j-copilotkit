@@ -10,10 +10,11 @@
   },
   "dependencies": {
     "@ag-ui/client": "^0.0.35",
-    "@copilotkit/react-core": "^1.51.2",
-    "@copilotkit/react-ui": "^1.51.2",
-    "@copilotkit/runtime": "^1.51.2",
-    "next": "15.4.6",
+    "@copilotkit/react-core": "^1.53.0",
+    "@copilotkit/react-textarea": "1.53.0",
+    "@copilotkit/react-ui": "^1.53.0",
+    "@copilotkit/runtime": "^1.53.0",
+    "next": "15.4.8",
     "react": "19.1.0",
     "react-dom": "19.1.0"
   },
@@ -28,5 +29,5 @@
     "tailwindcss": "^4",
     "typescript": "^5"
   },
-  "packageManager": "pnpm@10.29.3+sha512.498e1fb4cca5aa06c1dcf2611e6fafc50972ffe7189998c409e90de74566444298ffe43e6cd2acdc775ba1aa7cc5e092a8b7054c811ba8c5770f84693d33d2dc"
+  "packageManager": "pnpm@10.31.0+sha512.e3927388bfaa8078ceb79b748ffc1e8274e84d75163e67bc22e06c0d3aed43dd153151cbf11d7f8301ff4acb98c68bdc5cadf6989532801ffafe3b3e4a63c268"
 }
