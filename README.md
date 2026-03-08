@@ -44,12 +44,18 @@ flowchart LR
     %% - Finally, the Copilot Kit presents the results back to the User.
 
 ```
+## Tech. Stack
+
+* [AG-UI community sdk for java version `0.0.1`](https://github.com/ag-ui-protocol/ag-ui/tree/main/sdks/community/java)
+* [LangGraph4j `1.8.7`](https://github.com/langgraph4j/langgraph4j)
+* [CopilotKit `1.53.0`](https://www.copilotkit.ai)
+
 ## Getting Started
 
 ### Start LangGraph4j Agent
 
 ```bash
-mvn package spring-boot:test-run
+mvn package spring-boot:test-run -pl langgraph4j-ag-ui-sdk
 ```
 
 ### Start CopilotKit App
