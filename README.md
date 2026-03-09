@@ -56,14 +56,22 @@ flowchart LR
 
 ## Getting Started
 
-### Start LangGraph4j Agent
+### Update AG-UI submodule
+```
+git submodule update --init --remote
+```
 
+### Build project
+```
+mvn clean install -Dgpg.skip -Dmaven.javadoc.skip -Plocal
+```
+
+### Start LangGraph4j Agent
 ```bash
 mvn package spring-boot:test-run -pl langgraph4j-ag-ui-sdk
 ```
 
 ### Start CopilotKit App
-
 ```bash
 cd copilot-app
 npm run dev
