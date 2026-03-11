@@ -2,6 +2,42 @@
 
 
 
+<!-- "name: v0.0.3" is a release tag -->
+
+## [v0.0.3](https://github.com/bsorrentino/langgraph4j/releases/tag/v0.0.3) (2026-03-11)
+
+
+
+### Documentation
+
+ -  update readme ([448aba99cec2be0](https://github.com/bsorrentino/langgraph4j/commit/448aba99cec2be009732841de4d77faa30cd8c59))
+
+ -  update readme ([608fa74dbc9688a](https://github.com/bsorrentino/langgraph4j/commit/608fa74dbc9688a2c195d9ce4849be3616348317))
+
+ -  update readme ([3ec5a24f7a6f56c](https://github.com/bsorrentino/langgraph4j/commit/3ec5a24f7a6f56ced5c92851316cc8e38e83353e))
+
+ -  update changelog ([0ec43efbc0f55ae](https://github.com/bsorrentino/langgraph4j/commit/0ec43efbc0f55ae3b7dd45091888337780e170a4))
+
+
+### Refactor
+
+ -  **AGUIAbstractLangGraphAgent**  replace deprecated isEnd() to isStreamingEnd() in streaming check ([7bcf6e78fd7f375](https://github.com/bsorrentino/langgraph4j/commit/7bcf6e78fd7f375002aa360e0f2df6a3dc1a7c35))
+   
+ -  **AGUIAbstractLangGraphAgent**  align if/else blocks and enhance streaming output logging ([859d84dc976dc35](https://github.com/bsorrentino/langgraph4j/commit/859d84dc976dc35c8c232eda96f53fde58f5b823))
+   
+
+### ALM 
+
+ -  bump to next version 0.0.3 ([38adf9171566ef7](https://github.com/bsorrentino/langgraph4j/commit/38adf9171566ef76b347aaa2446fe7d569b25efe))
+   
+ -  update lg4j version to 1.8.8 ([a4b5f00527cf91a](https://github.com/bsorrentino/langgraph4j/commit/a4b5f00527cf91adf4c433a7d2fb063628b66a17))
+   
+
+
+
+
+
+
 <!-- "name: v0.0.2" is a release tag -->
 
 ## [v0.0.2](https://github.com/bsorrentino/langgraph4j/releases/tag/v0.0.2) (2026-03-08)
