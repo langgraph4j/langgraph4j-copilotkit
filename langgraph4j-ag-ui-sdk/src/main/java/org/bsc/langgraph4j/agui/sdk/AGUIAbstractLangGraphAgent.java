@@ -104,7 +104,7 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
                             emitter.next(EventFactory.textMessageStartEvent(messageId, Role.assistant.name()));
                             continue;
                         }
-                        if( output.isEnd() ) { // is streaming out ended
+                        if( output.isStreamingEnd() ) { // is streaming out ended
                             log.trace("STREAMING END");
                             streamingId.set(null);
                             emitter.next(EventFactory.textMessageEndEvent(messageId));
