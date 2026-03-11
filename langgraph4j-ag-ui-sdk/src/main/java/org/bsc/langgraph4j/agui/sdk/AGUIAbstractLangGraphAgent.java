@@ -98,34 +98,32 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
 
                     if (event instanceof StreamingOutput<? extends AgentState> output) {
                         var messageId = streamingId.get();
-                        if (messageId == null) {
-                            log.trace("STREAMING START");
-                            messageId = streamingId.updateAndGet(v -> newMessageId());
-
+                        if(messageId==null) {
+                            log.trace( "STREAMING START");
+                            messageId = streamingId.updateAndGet( v -> newMessageId() );
                             emitter.next(EventFactory.textMessageStartEvent(messageId, Role.assistant.name()));
+                            continue;
+                        }
+                        if( output.isStreamingEnd() ) { // is streaming out ended
+                            log.trace("STREAMING END");
+                            streamingId.set(null);
+                            emitter.next(EventFactory.textMessageEndEvent(messageId));
+                            continue;
                         }
 
-                        if (output.chunk() == null || output.chunk().isEmpty()) {
-                            log.trace("STREAMING CHUNK IS EMPTY");
-                        } else {
-                            log.trace("{}", output.chunk());
-
+                        if( output.chunk() == null || output.chunk().isEmpty()) {
+                            log.trace( "STREAMING CHUNK IS EMPTY");
+                        }
+                        else {
+                            log.trace( "{}", output.chunk());
                             emitter.next(EventFactory.textMessageContentEvent(messageId, output.chunk()));
                         }
                     } else {
 
-                        var messageId = streamingId.get();
-
-                        if (messageId == null) {
-                            log.trace("NEXT:\n{}", event);
-
-                            nodeOutputToEvents(input, event).forEach(emitter::next);
-                        } else {
-                            log.trace("STREAMING END");
-                            streamingId.set(null);
-                            emitter.next(EventFactory.textMessageEndEvent(messageId));
-                        }
+                        log.trace( "NEXT:\n{}", event);
+                        nodeOutputToEvents(input, event).forEach( emitter::next );
                     }
+
                 }
 
                 final var result = GraphResult.from(outputGenerator);
