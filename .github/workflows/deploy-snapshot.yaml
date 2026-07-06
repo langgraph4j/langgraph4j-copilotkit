@@ -23,6 +23,7 @@ jobs:
           java-package: jdk
       - name: Check for SNAPSHOT version
         id: check-snapshot
+        working-directory: ./langgraph4j-ag-ui-sdk
         run: |
           VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
           if [[ $VERSION == *"-SNAPSHOT" ]]; then
