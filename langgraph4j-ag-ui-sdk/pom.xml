@@ -72,11 +72,13 @@
 			<version>${ag-ui.version}</version>
 		</dependency>
 
+		<!--
 		<dependency>
 			<groupId>com.ag-ui.community</groupId>
 			<artifactId>java-json</artifactId>
 			<version>${ag-ui.version}</version>
 		</dependency>
+		-->
 
 		<dependency>
 			<groupId>org.bsc.langgraph4j</groupId>
