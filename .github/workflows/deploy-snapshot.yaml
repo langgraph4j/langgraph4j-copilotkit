@@ -2,11 +2,11 @@ name: Deploy New SNAPSHOT
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - develop
-    paths:
-      - '**/pom.xml'
+#  push:
+#    branches:
+#      - develop
+#    paths:
+#      - '**/pom.xml'
 jobs:
   deploy:
     runs-on: ubuntu-latest
