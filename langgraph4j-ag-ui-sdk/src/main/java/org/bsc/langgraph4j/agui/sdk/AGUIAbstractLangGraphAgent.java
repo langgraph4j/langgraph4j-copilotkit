@@ -83,7 +83,7 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
 
                 //runnableConfig = agent.updateState( runnableConfig, Map.of(AgentEx.APPROVAL_RESULT_PROPERTY, lastResultMessage ));
 
-                graphInput = GraphInput.resume(Map.of(AgentEx.APPROVAL_RESULT_PROPERTY, lastResultMessage )); // resume graph
+                graphInput = GraphInput.resume(Map.of(AgentEx.APPROVAL_RESULT, lastResultMessage )); // resume graph
             }
             else {
                 graphInput = buildGraphInput(input);
