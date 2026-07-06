@@ -29,15 +29,12 @@ public class AGUIAgentExecutor extends  AGUIAbstractLangGraphAgent {
     @Override
     protected GraphData buildStateGraph() throws GraphStateException {
 
-        var model = ofNullable(System.getenv("OPENAI_API_KEY"))
-                .map( key -> AIModel.OPENAI_GPT_4O_MINI.model.get())
-                .orElseGet( () ->
-                        ofNullable( System.getenv("GITHUB_MODELS_TOKEN") )
-                                .map( key -> AIModel.GITHUB_MODELS_GPT_4O_MINI.model.get() )
-                                .orElseGet( AIModel.OLLAMA_QWEN2_5_7B.model ));
+//        var model = ofNullable(System.getenv("OPENAI_API_KEY"))
+//                .map( key -> AiModel.OPENAI.chatModel("gpt-4o-mini"))
+//                .orElseGet( () -> AiModel.OLLAMA.chatModel("qwen3.5") );
 
         var agent =  AgentExecutorEx.builder()
-                .chatModel(model)
+                .chatModel(AiModel.OLLAMA.chatModel("qwen3.5"))
                 .emitStreamingEnd(true)
                 .streaming(true)
                 .toolsFromObject(new Tools())
