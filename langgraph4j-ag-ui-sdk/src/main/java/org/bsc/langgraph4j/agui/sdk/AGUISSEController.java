@@ -50,7 +50,9 @@ public class AGUISSEController {
     }
 
     @PostMapping(value = "/sse/{agentId}")
-    public Flux<String> streamDataWithFlux(@PathVariable("agentId") final String agentId, @RequestBody() AGUIParameters parameters ) throws JsonProcessingException {
+    public Flux<String> streamDataWithFlux(@PathVariable("agentId") final String agentId, @RequestBody() String  params ) throws JsonProcessingException {
+
+        final var parameters = objectMapper.readValue(params, AGUIParameters.class);
 
         return this.agUiAgent.run(parameters.toRunAgentParameters())
                 .map( event -> {
