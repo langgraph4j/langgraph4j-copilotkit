@@ -26,8 +26,6 @@ jobs:
       - name: Check for SNAPSHOT version
         id: check-snapshot
         run: |
-          set -x
-          mvn -version
           VERSION=$(mvn -N help:evaluate -Dexpression=project.version -q -DforceStdout)
           if [[ $VERSION == *"-SNAPSHOT" ]]; then
             echo "is_snapshot=true" >> $GITHUB_OUTPUT
