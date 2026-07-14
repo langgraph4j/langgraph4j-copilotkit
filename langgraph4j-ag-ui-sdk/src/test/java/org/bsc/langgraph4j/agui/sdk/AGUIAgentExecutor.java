@@ -7,6 +7,7 @@ import org.bsc.langgraph4j.GraphInput;
 import org.bsc.langgraph4j.GraphRepresentation;
 import org.bsc.langgraph4j.GraphStateException;
 import org.bsc.langgraph4j.action.InterruptionMetadata;
+import org.bsc.langgraph4j.agent.AgentEx;
 import org.bsc.langgraph4j.checkpoint.MemorySaver;
 import org.bsc.langgraph4j.spring.ai.agentexecutor.AgentExecutorEx;
 import org.bsc.langgraph4j.spring.ai.util.MessageUtil;
@@ -55,7 +56,7 @@ public class AGUIAgentExecutor extends  AGUIAbstractLangGraphAgent {
     }
 
     @Override
-    protected GraphInput buildGraphInput(RunAgentParameters input) {
+    protected GraphInput buildGraphInput(RunAgentParameters input, boolean resume) {
 
         var lastUserMessage = lastOf(input.getMessages())
                 .map(BaseMessage::getContent)
@@ -63,7 +64,9 @@ public class AGUIAgentExecutor extends  AGUIAbstractLangGraphAgent {
 
         log.debug( "LAST USER MESSAGE: {}", lastUserMessage );
 
-        return  GraphInput.args(Map.of("messages", new UserMessage(lastUserMessage)));
+        return (resume) ?
+            GraphInput.resume(Map.of(AgentEx.APPROVAL_RESULT, lastUserMessage)) :
+            GraphInput.args(Map.of("messages", new UserMessage(lastUserMessage)));
 
     }
 
