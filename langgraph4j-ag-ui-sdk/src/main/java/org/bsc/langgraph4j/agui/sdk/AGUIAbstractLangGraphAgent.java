@@ -32,7 +32,7 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
 
     protected abstract GraphData buildStateGraph() throws GraphStateException;
 
-    protected abstract GraphInput buildGraphInput(RunAgentParameters input);
+    protected abstract GraphInput buildGraphInput(RunAgentParameters input, boolean resume);
 
     protected abstract <S extends AgentState> List<Approval> onInterruption(RunAgentParameters input, InterruptionMetadata<S> state);
 
@@ -40,25 +40,16 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
         return String.valueOf(System.currentTimeMillis());
     }
 
-    protected Optional<String> nodeOutputToText(NodeOutput<? extends AgentState> output) {
-        return Optional.empty();
-    }
+    protected RunnableConfig buildRunnableConfig(RunAgentParameters input) {
+        return RunnableConfig.builder()
+                .threadId(input.getThreadId())
+                .build();
 
+    }
 
     protected Collection<? extends BaseEvent> nodeOutputToEvents(RunAgentParameters input, NodeOutput<? extends AgentState> output) {
-        return nodeOutputToText(output)
-                .map(text -> {
-                    var messageId = newMessageId();
-
-                    return List.of(
-                            EventFactory.textMessageStartEvent(messageId, Role.assistant.name()),
-                            EventFactory.textMessageContentEvent(messageId, text),
-                            EventFactory.textMessageEndEvent(messageId));
-                })
-                .orElseGet(List::of);
+        return List.of();
     }
-
-
 
     public final Flux<? extends BaseEvent> run(RunAgentParameters input) {
 
@@ -69,105 +60,90 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
 
             var agent = graphData.compiledGraph();
 
-            var runnableConfig = RunnableConfig.builder()
-                    .threadId(input.getThreadId())
-                    .build();
+            var runnableConfig = buildRunnableConfig(input);
 
-            final GraphInput graphInput ;
+            final GraphInput graphInput = buildGraphInput(input, graphData.interruption());
 
-            if( graphData.interruption() ) {
+            final var outputFlux = Flux.<BaseEvent>create(emitter -> {
 
-                var lastResultMessage = lastOf(input.getMessages())
-                        .map(BaseMessage::getContent)
-                        .orElseThrow( () -> new IllegalStateException( "last result message not found after interruption") );
+                agent.stream(graphInput, runnableConfig)
+                        .forEachAsync(event -> {
 
-                //runnableConfig = agent.updateState( runnableConfig, Map.of(AgentEx.APPROVAL_RESULT_PROPERTY, lastResultMessage ));
+                            if (event instanceof StreamingOutput<? extends AgentState> output) {
+                                var messageId = streamingId.get();
+                                if (messageId == null) {
+                                    log.trace("STREAMING START");
+                                    messageId = streamingId.updateAndGet(v -> newMessageId());
+                                    emitter.next(EventFactory.textMessageStartEvent(messageId, Role.assistant.name()));
+                                    //continue;
+                                    return;
+                                }
+                                if (output.isStreamingEnd()) { // is streaming out ended
+                                    log.trace("STREAMING END");
+                                    streamingId.set(null);
+                                    emitter.next(EventFactory.textMessageEndEvent(messageId));
+                                    //continue;
+                                    return;
+                                }
 
-                graphInput = GraphInput.resume(Map.of(AgentEx.APPROVAL_RESULT, lastResultMessage )); // resume graph
-            }
-            else {
-                graphInput = buildGraphInput(input);
-            }
+                                if (output.chunk() == null || output.chunk().isEmpty()) {
+                                    log.trace("STREAMING CHUNK IS EMPTY");
+                                } else {
+                                    log.trace("{}", output.chunk());
+                                    emitter.next(EventFactory.textMessageContentEvent(messageId, output.chunk()));
+                                }
+                            } else {
 
+                                log.trace("NEXT:\n{}", event);
+                                nodeOutputToEvents(input, event).forEach(emitter::next);
+                            }
 
-            final var outputGenerator = agent.stream(graphInput, runnableConfig);
+                        })
+                        .thenApply(GraphResult::from)
+                        .thenAccept(result -> {
 
-            var outputFlux = Flux.<BaseEvent>create(emitter -> {
+                            log.trace("COMPLETE:\n{}", result);
 
-                for (var event : outputGenerator) {
+                            if (result.isInterruptionMetadata()) {
 
-                    if (event instanceof StreamingOutput<? extends AgentState> output) {
-                        var messageId = streamingId.get();
-                        if(messageId==null) {
-                            log.trace( "STREAMING START");
-                            messageId = streamingId.updateAndGet( v -> newMessageId() );
-                            emitter.next(EventFactory.textMessageStartEvent(messageId, Role.assistant.name()));
-                            continue;
-                        }
-                        if( output.isStreamingEnd() ) { // is streaming out ended
-                            log.trace("STREAMING END");
-                            streamingId.set(null);
-                            emitter.next(EventFactory.textMessageEndEvent(messageId));
-                            continue;
-                        }
+                                final var interruptionMetadata = result.asInterruptionMetadata();
 
-                        if( output.chunk() == null || output.chunk().isEmpty()) {
-                            log.trace( "STREAMING CHUNK IS EMPTY");
-                        }
-                        else {
-                            log.trace( "{}", output.chunk());
-                            emitter.next(EventFactory.textMessageContentEvent(messageId, output.chunk()));
-                        }
-                    } else {
+                                log.trace("INTERRUPTION DETECTED: {}", interruptionMetadata);
 
-                        log.trace( "NEXT:\n{}", event);
-                        nodeOutputToEvents(input, event).forEach( emitter::next );
-                    }
+                                graphByThread.put(input.getThreadId(), graphData.withInterruption(true));
 
-                }
+                                onInterruption(input, interruptionMetadata).forEach(approval -> {
+                                    final var messageId = newMessageId();
 
-                final var result = GraphResult.from(outputGenerator);
+                                    emitter.next(EventFactory.toolCallStartEvent(
+                                            messageId,
+                                            approval.toolName(),
+                                            approval.toolId()
+                                    ));
 
-                log.trace("COMPLETE:\n{}", result);
+                                    emitter.next(EventFactory.toolCallArgsEvent(
+                                            approval.toolArgs(),
+                                            approval.toolId()
+                                    ));
 
-                if (result.isInterruptionMetadata()) {
+                                    emitter.next(EventFactory.toolCallEndEvent(
+                                            approval.toolId()));
 
-                    final var interruptionMetadata = result.asInterruptionMetadata();
+                                });
 
-                    log.trace("INTERRUPTION DETECTED: {}", interruptionMetadata);
+                            } else {
+                                graphByThread.put(input.getThreadId(), graphData.withInterruption(false));
 
-                    graphByThread.put(input.getThreadId(), graphData.withInterruption(true));
+                                // Thread CleanUp
+                                //graphByThread.remove(input.threadId());
+                                //var tag = saver.release( runnableConfig );
+                                //log.debug( "thread '{}' released", tag.threadId() );
 
-                    onInterruption(input, interruptionMetadata).forEach(approval -> {
-                        final var messageId = newMessageId();
+                            }
 
-                        emitter.next(EventFactory.toolCallStartEvent(
-                                messageId,
-                                approval.toolName(),
-                                approval.toolId()
-                                ));
+                            emitter.complete();
+                        });
 
-                        emitter.next(EventFactory.toolCallArgsEvent(
-                                approval.toolArgs(),
-                                approval.toolId()
-                                ));
-
-                        emitter.next(EventFactory.toolCallEndEvent(
-                                approval.toolId()));
-
-                    });
-
-                } else {
-                    graphByThread.put(input.getThreadId(), graphData.withInterruption(false));
-
-                    // Thread CleanUp
-                    //graphByThread.remove(input.threadId());
-                    //var tag = saver.release( runnableConfig );
-                    //log.debug( "thread '{}' released", tag.threadId() );
-
-                }
-
-                emitter.complete();
 
             });
             return Mono.<BaseEvent>just(
