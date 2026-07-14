@@ -51,6 +51,14 @@
 			</dependency>
 
 			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-framework-bom</artifactId>
+				<version>7.0.8</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<dependency>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-starter-parent</artifactId>
 				<version>4.1.0</version>
@@ -59,7 +67,15 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+
 	<dependencies>
+
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>1.5.37</version>
+			<scope>provided</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>com.ag-ui.community</groupId>
@@ -72,6 +88,11 @@
 			<version>${ag-ui.version}</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.bsc.langgraph4j</groupId>
+			<artifactId>langgraph4j-core</artifactId>
+		</dependency>
+
 		<!--
 		<dependency>
 			<groupId>com.ag-ui.community</groupId>
@@ -79,21 +100,11 @@
 			<version>${ag-ui.version}</version>
 		</dependency>
 		-->
+
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 			<version>2.21.1</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.bsc.langgraph4j</groupId>
-			<artifactId>langgraph4j-core</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-annotations</artifactId>
-			<version>2.21</version> <!-- must be >= 2.21 for tools.jackson 3.1+ -->
 		</dependency>
 
 		<dependency>
@@ -103,15 +114,22 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>org.bsc.langgraph4j</groupId>
 			<artifactId>langgraph4j-javelit</artifactId>
 			<scope>test</scope>
 			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+			<scope>provided</scope>
 		</dependency>
 
 		<!--
@@ -119,6 +137,21 @@
 		TEST
 		================================================
 		-->
+
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!--
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webflux</artifactId>
+			<scope>test</scope>
+		</dependency>
+		-->
+
 		<dependency>
 			<groupId>org.springframework.ai</groupId>
 			<artifactId>spring-ai-commons</artifactId>
