@@ -57,6 +57,20 @@
     </dependencies>
 
     <build>
+        <plugins>
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.8.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>sonatype-central</publishingServerId>
+                    <autoPublish>true</autoPublish>
+                    <waitUntil>published</waitUntil>
+                </configuration>
+            </plugin>
+
+        </plugins>
     </build>
 
     <modules>
@@ -66,4 +80,19 @@
 	    <module>langgraph4j-ag-ui-client</module>
         <module>langgraph4j-ag-ui-json</module>
     </modules>
+
+    <repositories>
+        <repository>
+            <id>sonatype-central</id>
+            <name>sonatype snapshots</name>
+            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+    </repositories>
+
 </project>
