@@ -2,6 +2,7 @@ package org.bsc.langgraph4j.agui.sdk;
 
 import com.agui.core.agent.RunAgentParameters;
 import com.agui.core.event.BaseEvent;
+import com.agui.core.event.RunErrorEvent;
 import com.agui.core.message.BaseMessage;
 import com.agui.core.message.Role;
 import com.agui.server.EventFactory;
@@ -22,6 +23,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static java.util.Optional.ofNullable;
 import static org.bsc.langgraph4j.utils.CollectionsUtils.lastOf;
 
 public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
@@ -51,6 +53,11 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
         return List.of();
     }
 
+    public final RunErrorEvent toErrorEvent(Throwable error) {
+        return EventFactory
+                .runErrorEvent(ofNullable(error.getMessage()).orElseGet(error::toString));
+    }
+
     public final Flux<? extends BaseEvent> run(RunAgentParameters input) {
 
         final var graphData = graphByThread.computeIfAbsent(input.getThreadId(),
@@ -58,9 +65,9 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
 
         try {
 
-            var agent = graphData.compiledGraph();
+            final var agent = graphData.compiledGraph();
 
-            var runnableConfig = buildRunnableConfig(input);
+            final var runnableConfig = buildRunnableConfig(input);
 
             final GraphInput graphInput = buildGraphInput(input, graphData.interruption());
 
@@ -140,7 +147,20 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
                                 //log.debug( "thread '{}' released", tag.threadId() );
 
                             }
-
+                        }).whenComplete((ignored, throwable) -> {
+                            if (throwable != null) {
+                                log.error("Error during graph execution", throwable);
+                                if( agent.compileConfig.checkpointSaver().isPresent() ) {
+                                    try {
+                                        agent.compileConfig.checkpointSaver().get().releaseOnError(runnableConfig, throwable);
+                                    } catch (Exception e) {
+                                        log.error("Error releasing graph execution on error", e);
+                                    }
+                                }
+                                // The SSE controller must receive the error so it can
+                                // serialize a terminal RUN_ERROR event for the client.
+                                emitter.next(toErrorEvent(throwable));
+                            }
                             emitter.complete();
                         });
 
