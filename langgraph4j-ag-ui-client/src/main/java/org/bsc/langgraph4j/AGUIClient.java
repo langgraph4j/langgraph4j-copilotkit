@@ -2,6 +2,8 @@ package org.bsc.langgraph4j;
 
 import com.agui.core.agent.RunAgentInput;
 import com.agui.core.event.BaseEvent;
+import com.agui.core.event.RunErrorEvent;
+import com.agui.core.type.EventType;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -34,7 +36,7 @@ public class AGUIClient {
 
     }
 
-    public <T> T getSync(String path, Map<String, ?> parameters, TypeReference<T> typeReference) throws Exception {
+    public <T> T get(String path, Map<String, ?> parameters, TypeReference<T> typeReference) throws Exception {
         requireNonNull( path, "path is required");
         requireNonNull( parameters, "parameters are required");
         requireNonNull( typeReference, "typeReference is required");
@@ -97,7 +99,7 @@ public class AGUIClient {
                 .replace("+", "%20");
     }
 
-    public void streamEventsSync(String path, RunAgentInput input, Consumer<BaseEvent> consumer) throws Exception {
+    public void streamEvents(String path, RunAgentInput input, Consumer<BaseEvent> consumer) throws Exception {
         requireNonNull( path, "path is required");
         requireNonNull( input, "input is required");
         requireNonNull( consumer, "consumer is required");
@@ -115,6 +117,15 @@ public class AGUIClient {
                 request,
                 java.net.http.HttpResponse.BodyHandlers.ofInputStream());
 
+        if (response.statusCode() < 200 || response.statusCode() >= 300) {
+            try (var body = response.body()) {
+                throw new IllegalStateException(
+                        "SSE request failed with status %d: %s".formatted(
+                                response.statusCode(),
+                                new String(body.readAllBytes(), StandardCharsets.UTF_8)));
+            }
+        }
+
         //System.out.println("response: " + response);
 
         try (var reader = new BufferedReader(
@@ -123,6 +134,7 @@ public class AGUIClient {
             final var data = new StringBuilder();
 
             String line;
+
             while ((line = reader.readLine()) != null) {
 
                 if (line.isBlank()) {
@@ -132,6 +144,22 @@ public class AGUIClient {
                         consumer.accept(event);
 
                         data.setLength(0);
+
+                        // RUN_ERROR is the terminal error notification sent by
+                        // the server after the HTTP response has started.
+
+                        if( event.getType() == EventType.RUN_ERROR) {
+                            if( event instanceof RunErrorEvent errorEvent) {
+                                throw new Exception(
+                                        "Processing failed with status: %s".formatted(
+                                                errorEvent.getError()));
+                            }
+                            else {
+                                throw new Exception(
+                                        "Processing failed with unknown error event: %s".formatted(
+                                                event));
+                            }
+                        }
 
                     }
                     continue;
@@ -147,4 +175,3 @@ public class AGUIClient {
         }
     }
 }
-
