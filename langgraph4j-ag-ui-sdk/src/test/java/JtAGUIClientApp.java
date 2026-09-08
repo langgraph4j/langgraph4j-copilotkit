@@ -1,5 +1,5 @@
+//DEPS org.bsc.langgraph4j:langgraph4j-javelit:1.9.0-beta6
 //DEPS org.bsc.langgraph4j:langgraph4j-ag-ui-sdk:0.1.0
-//DEPS org.bsc.langgraph4j:langgraph4j-javelit:0.1.0
 /// DEPS net.sourceforge.plantuml:plantuml-mit:1.2025.10
 //DEPS org.springframework.ai:spring-ai-bom:2.0.0@pom
 //DEPS org.springframework.ai:spring-ai-client-chat
