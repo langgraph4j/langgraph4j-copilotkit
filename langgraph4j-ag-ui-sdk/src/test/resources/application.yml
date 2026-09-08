@@ -1,10 +1,10 @@
 spring:
   application:
     name: langgraph4j::ag-ui
-server:
-  port : 8081
 #  main:
 #    web-application-type: reactive
-agui:
+server:
+  port : 8081
+ag-ui:
   agent: agentExecutor
 #  agent: sample

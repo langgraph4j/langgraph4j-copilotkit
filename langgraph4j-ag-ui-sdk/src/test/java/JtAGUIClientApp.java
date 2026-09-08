@@ -1,5 +1,5 @@
-//DEPS org.bsc.langgraph4j:langgraph4j-ag-ui-sdk:1.9-SNAPSHOT
-//DEPS org.bsc.langgraph4j:langgraph4j-javelit:1.9-SNAPSHOT
+//DEPS org.bsc.langgraph4j:langgraph4j-javelit:1.9.0-beta6
+//DEPS org.bsc.langgraph4j:langgraph4j-ag-ui-sdk:0.1.0
 /// DEPS net.sourceforge.plantuml:plantuml-mit:1.2025.10
 //DEPS org.springframework.ai:spring-ai-bom:2.0.0@pom
 //DEPS org.springframework.ai:spring-ai-client-chat
@@ -18,13 +18,18 @@ import io.javelit.core.Jt;
 import org.bsc.javelit.JtSpinner;
 import org.bsc.langgraph4j.*;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+
 import com.agui.core.message.UserMessage;
 
 public class JtAGUIClientApp {
@@ -88,15 +93,28 @@ public class JtAGUIClientApp {
 
                 final var elapsedTime = Duration.between(startTime, Instant.now());
 
+                final var events = receivedEvents.stream()
+                        .map(Objects::toString)
+                        .map("* %s"::formatted)
+                        .collect(Collectors.joining("\n"));
+                Jt.text(events).use();
+
                 Jt.success("finished in %ds%n%n%s".formatted(elapsedTime.toSeconds(), "OK"))
                         .use(spinner);
             } catch (Exception e) {
-                Jt.error(e.getMessage()).use(spinner);
-            }
+                final var stackTrace = new StringWriter();
+                e.printStackTrace(new PrintWriter(stackTrace));
+
+                Jt.error("""
+                        **Agent execution failed**
+
+                        ```text
+                        %s
+                        ```
+                        """.formatted(stackTrace.toString())).use(spinner);            }
         }
 
     }
 
 
 }
-

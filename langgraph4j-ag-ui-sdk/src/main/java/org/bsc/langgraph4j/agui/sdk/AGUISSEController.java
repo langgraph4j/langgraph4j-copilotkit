@@ -3,6 +3,7 @@ package org.bsc.langgraph4j.agui.sdk;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.CacheControl;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,18 +23,26 @@ public class AGUISSEController {
         this.objectMapper = objectMapper;
     }
 
-    //@PostMapping(value = "/sse/{agentId}")
-    public ResponseEntity<SseEmitter> streamDataWithSseEmitter(@PathVariable("agentId") final String agentId, @RequestBody() AGUIParameters parameters ) throws JsonProcessingException {
-        final var emitter = new SseEmitter(Long.MAX_VALUE);
+    @PostMapping(
+            value = "/sse/{agentId}",
+            produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public ResponseEntity<SseEmitter> streamDataWithSseEmitter(
+            @PathVariable("agentId") String agentId,
+            @RequestBody String params
+    ) throws JsonProcessingException {
 
-        this.agUiAgent.run(parameters.toRunAgentParameters())
+        final var emitter = new SseEmitter(0L);
+        final var parameters = objectMapper.readValue(params, AGUIParameters.class);
+
+        final var disposable = this.agUiAgent.run(parameters.toRunAgentParameters())
                 .subscribe(
-                        ( event ) -> {
+                        event -> {
                             try {
-                                final var sseEvent = SseEmitter.event()
-                                            .data(" %s".formatted(objectMapper.writeValueAsString(event)))
-                                            .build();
-                                emitter.send(sseEvent);
+                                emitter.send(
+                                        SseEmitter.event()
+                                                .name("message")
+                                                .data(objectMapper.writeValueAsString(event), MediaType.APPLICATION_JSON)
+                                );
                             } catch (Exception e) {
                                 emitter.completeWithError(e);
                             }
@@ -42,14 +51,20 @@ public class AGUISSEController {
                         emitter::complete
                 );
 
-        return ResponseEntity
-                .ok()
-                .cacheControl(CacheControl.noCache())
-                .body(emitter);
+        emitter.onCompletion(disposable::dispose);
+        emitter.onTimeout(disposable::dispose);
+        emitter.onError(error -> disposable.dispose());
 
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.TEXT_EVENT_STREAM)
+                .cacheControl(CacheControl.noCache())
+                .header("X-Accel-Buffering", "no")
+                .body(emitter);
     }
 
-    @PostMapping(value = "/sse/{agentId}")
+    //@PostMapping(value = "/sse/{agentId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @PostMapping(value = "/flux/{agentId}")
     public Flux<String> streamDataWithFlux(@PathVariable("agentId") final String agentId, @RequestBody() String  params ) throws JsonProcessingException {
 
         final var parameters = objectMapper.readValue(params, AGUIParameters.class);
@@ -57,7 +72,8 @@ public class AGUISSEController {
         return this.agUiAgent.run(parameters.toRunAgentParameters())
                 .map( event -> {
                     try {
-                        return " %s".formatted(objectMapper.writeValueAsString(event));
+                        final var json = objectMapper.writeValueAsString(event);
+                        return " %s".formatted(json);
                     } catch (Exception e) {
                         throw new Error( e );
                     }

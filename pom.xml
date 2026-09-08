@@ -1,47 +1,98 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<groupId>org.bsc.langgraph4j</groupId>
-	<artifactId>langgraph4j-ag-ui-parent</artifactId>
-	<version>1.9-SNAPSHOT</version>
-	<packaging>pom</packaging>
+    <groupId>org.bsc.langgraph4j</groupId>
+    <artifactId>langgraph4j-ag-ui-parent</artifactId>
+    <version>0.1.0</version>
+    <packaging>pom</packaging>
 
-	<name>langgraph4j::ag-ui::parent</name>
-	<description>Langgraph4j integrate AG-UI protocol</description>
-	
-	<url>https://github.com/langgraph4j/langgraph4j-copilotkit</url>
-	<licenses>
-		<license>
-			<name>MIT</name>
-		</license>
-	</licenses>
-	<developers>
-		<developer>
-			<name>bsorrentino</name>
-			<email>bartolomeo.sorrentino@gmail.com</email>
-		</developer>
-	</developers>
-	
-	<properties>
+    <name>langgraph4j::ag-ui::parent</name>
+    <description>Langgraph4j integrate AG-UI protocol</description>
+
+    <url>https://github.com/langgraph4j/langgraph4j-copilotkit</url>
+    <licenses>
+        <license>
+            <name>MIT</name>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <name>bsorrentino</name>
+            <email>bartolomeo.sorrentino@gmail.com</email>
+        </developer>
+    </developers>
+
+    <properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.release>21</maven.compiler.release>
-	</properties>
+        <ag-ui.version>0.0.1</ag-ui.version>
+    </properties>
 
-	<dependencyManagement>
-	</dependencyManagement>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.bsc.langgraph4j</groupId>
+                <artifactId>langgraph4j-bom</artifactId>
+                <version>1.9.0-beta6</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>5.13.4</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
 
 
-	<dependencies>
-	</dependencies>
+    <dependencies>
+    </dependencies>
 
-	<build>
-	</build>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.8.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>sonatype-central</publishingServerId>
+                    <autoPublish>true</autoPublish>
+                    <waitUntil>published</waitUntil>
+                </configuration>
+            </plugin>
 
-	<modules>
-	<!--<module>langgraph4j-ag-ui-impl</module>-->
-		<module>langgraph4j-ag-ui-sdk</module>
-		<module>ag-ui/sdks/community/java</module>
-	</modules>
+        </plugins>
+    </build>
+
+    <modules>
+        <!--<module>langgraph4j-ag-ui-impl</module>-->
+        <module>langgraph4j-ag-ui-sdk</module>
+        <module>ag-ui/sdks/community/java</module>
+	    <module>langgraph4j-ag-ui-client</module>
+        <module>langgraph4j-ag-ui-json</module>
+    </modules>
+
+    <repositories>
+        <repository>
+            <id>sonatype-central</id>
+            <name>sonatype snapshots</name>
+            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+    </repositories>
+
 </project>
