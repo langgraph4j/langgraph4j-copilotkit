@@ -152,7 +152,7 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
                                 log.error("Error during graph execution", throwable);
                                 if( agent.compileConfig.checkpointSaver().isPresent() ) {
                                     try {
-                                        agent.compileConfig.checkpointSaver().get().releaseOnError(runnableConfig, throwable);
+                                        agent.compileConfig.checkpointSaver().get().releaseOnError(runnableConfig, new Exception(throwable));
                                     } catch (Exception e) {
                                         log.error("Error releasing graph execution on error", e);
                                     }
