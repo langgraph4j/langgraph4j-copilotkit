@@ -25,9 +25,20 @@
         </developer>
     </developers>
 
+    <scm>
+        <connection>scm:git:https://github.com/langgraph4j/langgraph4j-copilotkit.git</connection>
+        <developerConnection>scm:git: https://github.com/langgraph4j/langgraph4j-copilotkit.git</developerConnection>
+        <url>https://github.com/langgraph4j/langgraph4j-copilotkit</url>
+        <tag>HEAD</tag>
+    </scm>
+    <issueManagement>
+        <system>github</system>
+        <url>https://github.com/langgraph4j/langgraph4j-copilotkit/issues</url>
+    </issueManagement>
+
     <properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.release>21</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.release>21</maven.compiler.release>
         <ag-ui.version>0.0.1</ag-ui.version>
     </properties>
 
@@ -71,15 +82,57 @@
             </plugin>
 
         </plugins>
+
+
     </build>
 
     <modules>
-        <!--<module>langgraph4j-ag-ui-impl</module>-->
         <module>langgraph4j-ag-ui-sdk</module>
-        <module>ag-ui/sdks/community/java</module>
-	    <module>langgraph4j-ag-ui-client</module>
+        <module>langgraph4j-ag-ui-client</module>
         <module>langgraph4j-ag-ui-json</module>
     </modules>
+
+    <profiles>
+        <profile>
+            <id>agui</id>
+            <modules>
+                <module>ag-ui/sdks/community/java</module>
+                <module>langgraph4j-ag-ui-sdk</module>
+                <module>langgraph4j-ag-ui-client</module>
+                <module>langgraph4j-ag-ui-json</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>release</id>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>3.2.4</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <keyname>bartolomeo.sorrentino@gmail.com</keyname>
+                            <gpgArguments>
+                                <arg>--pinentry-mode</arg>
+                                <arg>loopback</arg>
+                            </gpgArguments>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+
+        </profile>
+    </profiles>
 
     <repositories>
         <repository>
