@@ -1,14 +1,10 @@
 package org.bsc.langgraph4j.agui.sdk;
 
-import com.agui.core.agent.RunAgentParameters;
-import com.agui.core.event.BaseEvent;
-import com.agui.core.event.RunErrorEvent;
-import com.agui.core.message.BaseMessage;
-import com.agui.core.message.Role;
-import com.agui.server.EventFactory;
+import com.agui.community.core.agent.RunAgentInput;
+import com.agui.community.core.event.*;
+import com.agui.community.core.message.Role;
 import org.bsc.langgraph4j.*;
 import org.bsc.langgraph4j.action.InterruptionMetadata;
-import org.bsc.langgraph4j.agent.AgentEx;
 import org.bsc.langgraph4j.state.AgentState;
 import org.bsc.langgraph4j.streaming.StreamingOutput;
 import org.bsc.langgraph4j.utils.TryFunction;
@@ -19,12 +15,10 @@ import reactor.core.scheduler.Schedulers;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static java.util.Optional.ofNullable;
-import static org.bsc.langgraph4j.utils.CollectionsUtils.lastOf;
 
 public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
 
@@ -34,33 +28,31 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
 
     protected abstract GraphData buildStateGraph() throws GraphStateException;
 
-    protected abstract GraphInput buildGraphInput(RunAgentParameters input, boolean resume);
+    protected abstract GraphInput buildGraphInput(RunAgentInput input, boolean resume);
 
-    protected abstract <S extends AgentState> List<Approval> onInterruption(RunAgentParameters input, InterruptionMetadata<S> state);
+    protected abstract <S extends AgentState> List<Approval> onInterruption(RunAgentInput input, InterruptionMetadata<S> state);
 
     protected String newMessageId() {
         return String.valueOf(System.currentTimeMillis());
     }
 
-    protected RunnableConfig buildRunnableConfig(RunAgentParameters input) {
+    protected RunnableConfig buildRunnableConfig(RunAgentInput input) {
         return RunnableConfig.builder()
-                .threadId(input.getThreadId())
+                .threadId(input.threadId())
                 .build();
 
     }
 
-    protected Collection<? extends BaseEvent> nodeOutputToEvents(RunAgentParameters input, NodeOutput<? extends AgentState> output) {
-        return List.of();
+    protected Collection<? extends Event> nodeOutputToEvents(RunAgentInput input, NodeOutput<? extends AgentState> output) {        return List.of();
     }
 
     public final RunErrorEvent toErrorEvent(Throwable error) {
-        return EventFactory
-                .runErrorEvent(ofNullable(error.getMessage()).orElseGet(error::toString));
+        return new RunErrorEvent(ofNullable(error.getMessage()).orElseGet(error::toString));
     }
 
-    public final Flux<? extends BaseEvent> run(RunAgentParameters input) {
+    public final Flux<? extends Event> run(RunAgentInput input) {
 
-        final var graphData = graphByThread.computeIfAbsent(input.getThreadId(),
+        final var graphData = graphByThread.computeIfAbsent(input.threadId(),
                 TryFunction.Try(k -> buildStateGraph()));
 
         try {
@@ -71,7 +63,7 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
 
             final GraphInput graphInput = buildGraphInput(input, graphData.interruption());
 
-            final var outputFlux = Flux.<BaseEvent>create(emitter -> {
+            final var outputFlux = Flux.<Event>create(emitter -> {
 
                 agent.stream(graphInput, runnableConfig)
                         .forEachAsync(event -> {
@@ -81,14 +73,14 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
                                 if (messageId == null) {
                                     log.trace("STREAMING START");
                                     messageId = streamingId.updateAndGet(v -> newMessageId());
-                                    emitter.next(EventFactory.textMessageStartEvent(messageId, Role.assistant.name()));
+                                    emitter.next( new TextMessageStartEvent(messageId, Role.ASSISTANT));
                                     //continue;
                                     return;
                                 }
                                 if (output.isStreamingEnd()) { // is streaming out ended
                                     log.trace("STREAMING END");
                                     streamingId.set(null);
-                                    emitter.next(EventFactory.textMessageEndEvent(messageId));
+                                    emitter.next(new TextMessageEndEvent(messageId));
                                     //continue;
                                     return;
                                 }
@@ -97,7 +89,7 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
                                     log.trace("STREAMING CHUNK IS EMPTY");
                                 } else {
                                     log.trace("{}", output.chunk());
-                                    emitter.next(EventFactory.textMessageContentEvent(messageId, output.chunk()));
+                                    emitter.next(new TextMessageContentEvent(messageId, output.chunk()));
                                 }
                             } else {
 
@@ -117,29 +109,30 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
 
                                 log.trace("INTERRUPTION DETECTED: {}", interruptionMetadata);
 
-                                graphByThread.put(input.getThreadId(), graphData.withInterruption(true));
+                                graphByThread.put(input.threadId(), graphData.withInterruption(true));
 
                                 onInterruption(input, interruptionMetadata).forEach(approval -> {
                                     final var messageId = newMessageId();
 
-                                    emitter.next(EventFactory.toolCallStartEvent(
-                                            messageId,
+                                    emitter.next(new ToolCallStartEvent(
+                                            approval.toolId(),
                                             approval.toolName(),
-                                            approval.toolId()
+                                            messageId,
+                                            null,
+                                            null
                                     ));
 
-                                    emitter.next(EventFactory.toolCallArgsEvent(
+                                    emitter.next(new ToolCallArgsEvent(
                                             approval.toolArgs(),
                                             approval.toolId()
                                     ));
 
-                                    emitter.next(EventFactory.toolCallEndEvent(
-                                            approval.toolId()));
+                                    emitter.next(new ToolCallEndEvent(approval.toolId()));
 
                                 });
 
                             } else {
-                                graphByThread.put(input.getThreadId(), graphData.withInterruption(false));
+                                graphByThread.put(input.threadId(), graphData.withInterruption(false));
 
                                 // Thread CleanUp
                                 //graphByThread.remove(input.threadId());
@@ -166,13 +159,13 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
 
 
             });
-            return Mono.<BaseEvent>just(
-                            EventFactory.runStartedEvent(input.getThreadId(), input.getRunId())
+            return Mono.<Event>just(
+                            new RunStartedEvent(input.threadId(), input.runId())
                     )
                     .concatWith(outputFlux.subscribeOn(Schedulers.immediate()))
                     .concatWith(
-                            Mono.<BaseEvent>just(
-                                    EventFactory.runFinishedEvent(input.getThreadId(), input.getRunId())));
+                            Mono.<Event>just(
+                                    new RunFinishedEvent(input.threadId(), input.runId())));
 
         } catch (Exception e) {
             return Flux.error(e);

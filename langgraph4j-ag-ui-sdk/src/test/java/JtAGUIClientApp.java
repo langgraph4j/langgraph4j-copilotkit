@@ -7,33 +7,66 @@
 //DEPS org.springframework.ai:spring-ai-ollama
 //DEPS org.springframework.ai:spring-ai-google-genai
 ///DEPS org.springframework.ai:spring-ai-azure-openai
-//DEPS com.ag-ui.community:java-ok-http:4.12.0
+//DEPS org.bsc.langgraph4j:langgraph4j-ag-ui-json:0.1.0
+//DEPS com.ag-ui.community:java-client:0.1.0
 
-import com.agui.core.agent.RunAgentInput;
-import com.agui.core.event.BaseEvent;
-import com.agui.core.message.Role;
-import com.agui.core.state.State;
-import com.agui.okhttp.HttpClient;
+import com.agui.community.client.HttpAgent;
+import com.agui.community.core.agent.RunAgentInput;
+import com.agui.community.core.event.Event;
+import com.agui.community.core.message.UserMessage;
+import com.agui.json.AGUIJacksonSerializer;
 import io.javelit.core.Jt;
 import org.bsc.javelit.JtSpinner;
 import org.bsc.langgraph4j.*;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Flow;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
-
-import com.agui.core.message.UserMessage;
 
 public class JtAGUIClientApp {
 
+    static class EventEmitter implements Flow.Subscriber<Event> {
+
+        private Flow.Subscription subscription;
+        private final List<Event> receivedEvents = new ArrayList<>();
+        private final CompletableFuture<List<Event>> future;
+
+        public EventEmitter(CompletableFuture<List<Event>> future) {
+            this.future = Objects.requireNonNull(future);
+        }
+
+        @Override
+        public void onSubscribe(Flow.Subscription subscription) {
+            this.subscription = subscription;
+            subscription.request(Long.MAX_VALUE);
+        }
+
+        @Override
+        public void onNext(Event event) {
+            receivedEvents.add(event);
+        }
+
+        @Override
+        public void onError(Throwable throwable) {
+            future.completeExceptionally(throwable);
+        }
+
+        @Override
+        public void onComplete() {
+            future.complete(receivedEvents);
+        }
+
+    }
     public static void main(String[] args) {
 
         var app = new JtAGUIClientApp();
@@ -66,30 +99,27 @@ public class JtAGUIClientApp {
             try {
                 final var startTime = Instant.now();
 
-                final var client = new HttpClient(url);
+                final var client = new HttpAgent(new URI(url), new AGUIJacksonSerializer());
 
-                final var userMessage = new UserMessage();
-                userMessage.setContent("Hello, I need help with my project.");
-                userMessage.setName(Role.user.name());
-                
+                final var userMessage = new UserMessage(
+                        "m1", "Hello, I need help with my project."
+                );
+
                 var input = new RunAgentInput(
                         threadId,
                         runId,
-                        new State(),
+                        null,
                         List.of( userMessage ),
                         List.of(), // tools
                         List.of(), // context
                         "props" // forwardedProps
                 );
-                var cancellationToken = new AtomicBoolean(false);
-                List<BaseEvent> receivedEvents = new ArrayList<>();
 
-                var future = client.streamEvents(
-                        input,
-                        receivedEvents::add,
-                        cancellationToken
-                );
-                future.get(1, TimeUnit.MINUTES);
+                final var future = new CompletableFuture<List<Event>>();
+
+                client.run(input).subscribe(new EventEmitter(future));
+
+                final var receivedEvents = future.get(1, TimeUnit.MINUTES);
 
                 final var elapsedTime = Duration.between(startTime, Instant.now());
 

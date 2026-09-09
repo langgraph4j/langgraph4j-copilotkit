@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.bsc.langgraph4j</groupId>
 		<artifactId>langgraph4j-ag-ui-parent</artifactId>
-		<version>0.1.0</version>
+		<version>0.2.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -67,19 +67,7 @@
 			<version>1.5.37</version>
 			<scope>provided</scope>
 		</dependency>
-<!--
-		<dependency>
-			<groupId>com.ag-ui.community</groupId>
-			<artifactId>java-client</artifactId>
-			<version>${ag-ui.version}</version>
-		</dependency>
 
-		<dependency>
-			<groupId>com.ag-ui.community</groupId>
-			<artifactId>java-json</artifactId>
-			<version>${ag-ui.version}</version>
-		</dependency>
--->
 		<dependency>
 			<groupId>com.ag-ui.community</groupId>
 			<artifactId>java-server</artifactId>
@@ -130,7 +118,6 @@
 			<groupId>org.bsc.langgraph4j</groupId>
 			<artifactId>langgraph4j-javelit</artifactId>
 			<scope>test</scope>
-			<optional>true</optional>
 		</dependency>
 
 		<dependency>
@@ -190,8 +177,8 @@
 
 		<dependency>
 			<groupId>com.ag-ui.community</groupId>
-			<artifactId>java-ok-http</artifactId>
-			<version>4.12.0</version>
+			<artifactId>java-client</artifactId>
+			<version>${ag-ui.version}</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -203,33 +190,6 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-shade-plugin</artifactId>
-				<version>3.6.0</version>
-				<executions>
-					<execution>
-						<id>ag-ui-fatjar</id>
-						<phase>package</phase>
-						<goals>
-							<goal>shade</goal>
-						</goals>
-						<configuration>
-							<shadedArtifactAttached>true</shadedArtifactAttached>
-							<shadedClassifierName>all</shadedClassifierName>
-							<createDependencyReducedPom>false</createDependencyReducedPom>
-							<artifactSet>
-								<includes>
-									<include>com.ag-ui.community:*</include>
-								</includes>
-							</artifactSet>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-
-
 		</plugins>
 	</build>
 
