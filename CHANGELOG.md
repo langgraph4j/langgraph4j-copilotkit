@@ -2,6 +2,162 @@
 
 
 
+<!-- "name: v0.2.0-beta1" is a release tag -->
+
+## [v0.2.0-beta1](https://github.com/bsorrentino/langgraph4j/releases/tag/v0.2.0-beta1) (2026-09-09)
+
+### Features
+
+ *  add error handling and conversion to RunErrorEvent in graph execution ([69f3758949395b3](https://github.com/bsorrentino/langgraph4j/commit/69f3758949395b31ee1380fa7dc2e0125d34458f))
+   
+ *  add AGUIConfigurations class for custom ObjectMapper configuration ([23c7f0dbadcd0ca](https://github.com/bsorrentino/langgraph4j/commit/23c7f0dbadcd0cac12e853441094cdce27064c7a))
+   
+
+### Bug Fixes
+
+ -  wrap throwable in Exception for checkpoint release on error ([c31de6a3ccebe51](https://github.com/bsorrentino/langgraph4j/commit/c31de6a3ccebe51f1ace68a2e653424381e80480))
+
+ -  reset ag-ui submodule reference ([262ad87b21ca6b9](https://github.com/bsorrentino/langgraph4j/commit/262ad87b21ca6b9cb9ec65d1d78da091fa3aa9b2))
+
+ -  **AGUIAbstractLangGraphAgent**  correct approval property key in GraphInput.resume method ([19ebeb6f9fdb064](https://github.com/bsorrentino/langgraph4j/commit/19ebeb6f9fdb06414ca067068ac793074e07aefb))
+
+
+### Documentation
+
+ -  update tech stack versions in README.md ([3be4e8c26d00473](https://github.com/bsorrentino/langgraph4j/commit/3be4e8c26d00473e6f5da7d409eb1aca8b65d0e2))
+
+ -  update changelog ([6319ec169f06782](https://github.com/bsorrentino/langgraph4j/commit/6319ec169f06782918c88c53b86ca47ffbd7ee97))
+
+
+### Refactor
+
+ -  align implementation to ag-ui community java version 0.1.0 ([60803e1ab69aa6f](https://github.com/bsorrentino/langgraph4j/commit/60803e1ab69aa6f8823be05da9a640776d71a6c8))
+   
+ -  rename methods for clarity and enhance error handling in event streaming ([72bc8d288f20329](https://github.com/bsorrentino/langgraph4j/commit/72bc8d288f2032921c227d4b9aa420a41e433725))
+   
+ -  remove Sonatype central publishing plugin and repository configuration from pom.xml ([2dd2d4f31a942ad](https://github.com/bsorrentino/langgraph4j/commit/2dd2d4f31a942ad942a7a67cfed84237585396fa))
+   
+ -  reorganize project structure ([358f4ab25eb55ac](https://github.com/bsorrentino/langgraph4j/commit/358f4ab25eb55ac1047c5c32df8cd236fda528f9))
+    > - update dependency management
+ > - add module langgraph4j-ag-ui-client
+ > - add module langgraph4j-ag-ui-json
+
+ -  **javelit**  enhance error handling and event logging in JtAGUIClientApp ([3c8e73fb9ecd1bc](https://github.com/bsorrentino/langgraph4j/commit/3c8e73fb9ecd1bce56c31941dd029a8fd283884a))
+   
+ -  update SSE endpoint to use MediaType.TEXT_EVENT_STREAM and improve event handling ([9f4675acc8f7444](https://github.com/bsorrentino/langgraph4j/commit/9f4675acc8f744457eaa24b021f9459c2ad0fb8f))
+   
+ -  update buildGraphInput method to include resume parameter and clean up nodeOutputToEvents method ([f5c88f6766e1d39](https://github.com/bsorrentino/langgraph4j/commit/f5c88f6766e1d395be0c1337674cef857104fa15))
+   
+ -  remove unnecessary Maven version check ([7474bee85996c3c](https://github.com/bsorrentino/langgraph4j/commit/7474bee85996c3ca6d15cafc507c80f4fb1f4535))
+   
+ -  remove unused module ([1afb95a07a58427](https://github.com/bsorrentino/langgraph4j/commit/1afb95a07a584273ed33bc6014211c106ada9607))
+   
+ -  **AGUISSEController**  update streamDataWithFlux method to accept raw JSON string ([4e94bbb7a6e6e4f](https://github.com/bsorrentino/langgraph4j/commit/4e94bbb7a6e6e4f9ba57d2d299c8579d8ef1fe31))
+   
+
+### ALM 
+
+ -  bump to next version 0.2.0-beta1 ([1d9f54e52c4bd0b](https://github.com/bsorrentino/langgraph4j/commit/1d9f54e52c4bd0bc35707aa23c4c99d0247a6efc))
+   
+ -  update version to 0.2.0-SNAPSHOT ([a091cdc4742cfde](https://github.com/bsorrentino/langgraph4j/commit/a091cdc4742cfde58472f6b080b8b9197260e9bb))
+   
+ -  re-add ag-ui submodule ([b7063b8365b166f](https://github.com/bsorrentino/langgraph4j/commit/b7063b8365b166fe487097fe288ba1763aa2ae20))
+   
+ -  add SCM and issue management sections to pom.xml ([5ad0a89a8dfcd3c](https://github.com/bsorrentino/langgraph4j/commit/5ad0a89a8dfcd3c9c82f181ebca267ffb38afad4))
+   
+ -  update langgraph4j-javelit version to 1.9.0-beta6 in JtAGUIClientApp.java ([ab68326ef1b7fd0](https://github.com/bsorrentino/langgraph4j/commit/ab68326ef1b7fd016f655af569eb487d39205315))
+   
+ -  bump to next version 0.1.0 ([424303aea867831](https://github.com/bsorrentino/langgraph4j/commit/424303aea8678318fe2ca2be99ed8719deadeee8))
+   
+ -  update langgraph4j-bom version to 1.9.0-beta6 in pom.xml ([e404c4c29976edd](https://github.com/bsorrentino/langgraph4j/commit/e404c4c29976edd836d7d26fd5bf06d5788b70bf))
+   
+ -  update Maven command to include langgraph4j-ag-ui-client in deployment ([021090342d96a33](https://github.com/bsorrentino/langgraph4j/commit/021090342d96a335c5ce80f3dd02d60ce85ae239))
+   
+ -  add maven-shade-plugin configuration for creating a fat JAR ([52fe4fb88a17def](https://github.com/bsorrentino/langgraph4j/commit/52fe4fb88a17deff68d8bf0ab2cb901949018c56))
+   
+ -  add Sonatype central publishing plugin and repository configuration ([cfa43aa554e6aac](https://github.com/bsorrentino/langgraph4j/commit/cfa43aa554e6aacaa0de58877ec490e3956555a9))
+   
+ -  add Spring Framework BOM and update dependencies in pom.xml ([563012df3c27872](https://github.com/bsorrentino/langgraph4j/commit/563012df3c2787218e8a1c60bcb41234b782d78d))
+   
+ -  reset and re-add ag-ui submodule ([107af73de41d692](https://github.com/bsorrentino/langgraph4j/commit/107af73de41d69233e2baa8642f5b66619e6a0ea))
+   
+ -  re-add ag-ui submodule ([bcf443658e43d50](https://github.com/bsorrentino/langgraph4j/commit/bcf443658e43d5009c4c1a9351900cd5cd1e48d4))
+   
+ -  remove broken ag-ui submodule ([0fc34b59a508539](https://github.com/bsorrentino/langgraph4j/commit/0fc34b59a508539062afab4bbd50176a7b213a17))
+   
+ -  **deploy-snapshot**  comment out push trigger for develop branch ([542caa8b93165db](https://github.com/bsorrentino/langgraph4j/commit/542caa8b93165db57861c8a7647d63d7e507b6c6))
+   
+ -  Update ag-ui submodule reference ([b6dfbf0971de09b](https://github.com/bsorrentino/langgraph4j/commit/b6dfbf0971de09b5d493b1c3abfaa82aa7182140))
+   
+ -  remove com.ag-ui.community.java-json dep, add jackson-databind dependency version 2.21.1 ([db76526ebf4e4f1](https://github.com/bsorrentino/langgraph4j/commit/db76526ebf4e4f1a81716ad6df503bc05f84e5e0))
+   
+ -  **deploy-snapshot**  enable recursive submodule checkout and set fetch depth ([32f731729025a42](https://github.com/bsorrentino/langgraph4j/commit/32f731729025a422acd8dc47d1f55e21a68f47a1))
+   
+ -  Update ag-ui submodule reference ([f3c4c14185866ec](https://github.com/bsorrentino/langgraph4j/commit/f3c4c14185866ec5a87f7e95a5a7bf15e27eee09))
+   
+ -  update ag-ui sub module ([2dd3b46122dba0f](https://github.com/bsorrentino/langgraph4j/commit/2dd3b46122dba0f41c082c544d073e8ce4d647ca))
+   
+ -  **langgraph4j-ag-ui-sdk**  embed com.ag-ui.community.java-json module ([b01faf4c7629c03](https://github.com/bsorrentino/langgraph4j/commit/b01faf4c7629c031073c82d86910bb793eec4649))
+   
+ -  **deploy-snapshot**  enable submodule checkout in deploy workflow ([421837cb2d4fda9](https://github.com/bsorrentino/langgraph4j/commit/421837cb2d4fda91cb580235f7d170674f352508))
+   
+ -  **deploy-snapshot**  specify module for version check in SNAPSHOT detection ([0c977d7be4cc191](https://github.com/bsorrentino/langgraph4j/commit/0c977d7be4cc191bc22bd72d0e5aa01b3fe3c1e5))
+   
+ -  **deploy-snapshot**  set working directory for SNAPSHOT version check ([58c7779d36a442e](https://github.com/bsorrentino/langgraph4j/commit/58c7779d36a442e8a00fa7536de15c71960c9dfe))
+   
+ -  **deploy-snapshot**  update JDK version from 17 to 21 ([0fa992de5d5e7f9](https://github.com/bsorrentino/langgraph4j/commit/0fa992de5d5e7f9ff9eba0c593defeff53ec551e))
+   
+ -  **deploy-snapshot**  update Maven command to include clean install step ([56b798ee2d363fd](https://github.com/bsorrentino/langgraph4j/commit/56b798ee2d363fd6ccf583931e9d93846ec23298))
+   
+ -  **deploy-snapshot**  downgrade setup-java action to version 5 ([2882edee6e86830](https://github.com/bsorrentino/langgraph4j/commit/2882edee6e868300bc06fe5dfe1c027c0238e977))
+   
+ -  **deploy-snapshot**  update GitHub actions to use latest versions of checkout and setup-java ([ac6ce58b6e80e2d](https://github.com/bsorrentino/langgraph4j/commit/ac6ce58b6e80e2d7ac57568253df6f594f7e52aa))
+   
+ -  **langgraph4j-ag-ui-sdk**  add maven-shade-plugin for creating fat JARs ([1a436524dc4d91d](https://github.com/bsorrentino/langgraph4j/commit/1a436524dc4d91d531cef72a74f317e1dad1d55d))
+   
+ -  update ag-ui sdk submodule ([6d59912fda13336](https://github.com/bsorrentino/langgraph4j/commit/6d59912fda13336f33b4a009f0c735e87fd77152))
+   
+ -  **langgraph4j-ag-ui-sdk**  update ag-ui sdk dependency management ([721a6fb32d806b5](https://github.com/bsorrentino/langgraph4j/commit/721a6fb32d806b5ba599bd5cc0cb5f0298080394))
+    > Align the module parent and LangGraph4j BOM with 1.9-SNAPSHOT. Upgrade Spring AI and Spring Boot BOM versions, centralize AG-UI dependency versions, and add required Jackson annotations support. Adjust test dependencies for Spring AI BOM-managed versions and add AG-UI OkHttp test support.
+
+ -  update version to 1.9-SNAPSHOT and set Maven compiler release to 21 ([efadcfc9432baba](https://github.com/bsorrentino/langgraph4j/commit/efadcfc9432baba2b46051a20882ae75e566fe60))
+   
+
+### Test 
+
+ -  update application.yml add specific port ([29d8f50fcd4e4da](https://github.com/bsorrentino/langgraph4j/commit/29d8f50fcd4e4dafe236155dbc89a6b74d85a892))
+   
+ -  update buildGraphInput method to include resume parameter for improved state handling ([b7edc0afaccbf87](https://github.com/bsorrentino/langgraph4j/commit/b7edc0afaccbf87faa753213b5cc39ea90143a1f))
+   
+ -  **deploy-snapshot**  improve SNAPSHOT version check by adding Maven version output ([8ea15f1e52b60c5](https://github.com/bsorrentino/langgraph4j/commit/8ea15f1e52b60c5e1fb5a70b5a99299459133a8e))
+   
+ -  **langgraph4j-ag-ui-sdk**  refine test application ([bc5ad2a4794c352](https://github.com/bsorrentino/langgraph4j/commit/bc5ad2a4794c352248d495400133d8b7cf10d790))
+   
+ -  **javelit**  add JtAGUIClientApp class for LangGraph4J AG UI client implementation ([f431de22b5ea980](https://github.com/bsorrentino/langgraph4j/commit/f431de22b5ea980047c28b176d6e1e7f9cc50f04))
+   
+
+### Continuous Integration
+
+ -  simplify deployment command in deploy-snapshot.yaml ([9cdedcfa8939001](https://github.com/bsorrentino/langgraph4j/commit/9cdedcfa89390018f8784a4dba4d63dac8988769))
+   
+
+
+
+
+<!-- "name: v1.9-20260706" is a release tag -->
+
+## [v1.9-20260706](https://github.com/bsorrentino/langgraph4j/releases/tag/v1.9-20260706) (2026-07-06)
+
+
+
+
+
+
+
+
+
+
+
 <!-- "name: v0.0.3" is a release tag -->
 
 ## [v0.0.3](https://github.com/bsorrentino/langgraph4j/releases/tag/v0.0.3) (2026-03-11)
