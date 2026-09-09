@@ -6,7 +6,7 @@
 
     <groupId>org.bsc.langgraph4j</groupId>
     <artifactId>langgraph4j-ag-ui-parent</artifactId>
-    <version>0.1.0</version>
+    <version>0.2.0-beta1</version>
     <packaging>pom</packaging>
 
     <name>langgraph4j::ag-ui::parent</name>
@@ -39,7 +39,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>21</maven.compiler.release>
-        <ag-ui.version>0.0.1</ag-ui.version>
+        <ag-ui.version>0.1.0</ag-ui.version>
     </properties>
 
     <dependencyManagement>
@@ -88,7 +88,6 @@
 
     <modules>
         <module>langgraph4j-ag-ui-sdk</module>
-        <module>langgraph4j-ag-ui-client</module>
         <module>langgraph4j-ag-ui-json</module>
     </modules>
 
@@ -96,9 +95,8 @@
         <profile>
             <id>agui</id>
             <modules>
-                <module>ag-ui/sdks/community/java</module>
+                <module>ag-ui/sdks/community/java/ag-ui</module>
                 <module>langgraph4j-ag-ui-sdk</module>
-                <module>langgraph4j-ag-ui-client</module>
                 <module>langgraph4j-ag-ui-json</module>
             </modules>
         </profile>

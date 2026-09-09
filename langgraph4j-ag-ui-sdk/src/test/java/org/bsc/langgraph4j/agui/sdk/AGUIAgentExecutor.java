@@ -1,7 +1,6 @@
 package org.bsc.langgraph4j.agui.sdk;
 
-import com.agui.core.agent.RunAgentParameters;
-import com.agui.core.message.BaseMessage;
+import com.agui.community.core.agent.RunAgentInput;
 import org.bsc.langgraph4j.CompileConfig;
 import org.bsc.langgraph4j.GraphInput;
 import org.bsc.langgraph4j.GraphRepresentation;
@@ -20,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static java.util.Optional.ofNullable;
 import static org.bsc.langgraph4j.utils.CollectionsUtils.lastOf;
 
 public class AGUIAgentExecutor extends  AGUIAbstractLangGraphAgent {
@@ -56,10 +54,10 @@ public class AGUIAgentExecutor extends  AGUIAbstractLangGraphAgent {
     }
 
     @Override
-    protected GraphInput buildGraphInput(RunAgentParameters input, boolean resume) {
+    protected GraphInput buildGraphInput(RunAgentInput input, boolean resume) {
 
-        var lastUserMessage = lastOf(input.getMessages())
-                .map(BaseMessage::getContent)
+        var lastUserMessage = lastOf(input.messages())
+                .map(com.agui.community.core.message.Message::content)
                 .orElseThrow( () -> new IllegalStateException("last user message not found"));
 
         log.debug( "LAST USER MESSAGE: {}", lastUserMessage );
@@ -71,7 +69,7 @@ public class AGUIAgentExecutor extends  AGUIAbstractLangGraphAgent {
     }
 
     @Override
-    protected <S extends AgentState> List<Approval> onInterruption(RunAgentParameters input, InterruptionMetadata<S> state) {
+    protected <S extends AgentState> List<Approval> onInterruption(RunAgentInput input, InterruptionMetadata<S> state) {
 
         var messages = state.state().<List<Message>>value("messages")
                 .orElseThrow( () -> new IllegalStateException("messages not found into given state"));

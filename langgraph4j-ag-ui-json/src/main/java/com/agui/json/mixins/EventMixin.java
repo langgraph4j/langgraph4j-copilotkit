@@ -1,6 +1,6 @@
 package com.agui.json.mixins;
 
-import com.agui.core.event.*;
+import com.agui.community.core.event.*;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
@@ -25,9 +25,12 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
  * <li>Step management: STEP_STARTED, STEP_FINISHED</li>
  * <li>Message events: TEXT_MESSAGE_START, TEXT_MESSAGE_CONTENT, TEXT_MESSAGE_CHUNK, TEXT_MESSAGE_END</li>
  * <li>Tool execution: TOOL_CALL_START, TOOL_CALL_ARGS, TOOL_CALL_CHUNK, TOOL_CALL_END, TOOL_CALL_RESULT</li>
- * <li>Thinking process: THINKING_START, THINKING_END, THINKING_TEXT_MESSAGE_START, THINKING_TEXT_MESSAGE_CONTENT, THINKING_TEXT_MESSAGE_END</li>
+ * <li>Reasoning process: REASONING_START, REASONING_END, REASONING_MESSAGE_START,
+ * REASONING_MESSAGE_CONTENT, REASONING_MESSAGE_END, REASONING_MESSAGE_CHUNK,
+ * REASONING_ENCRYPTED_VALUE</li>
  * <li>State management: STATE_SNAPSHOT, STATE_DELTA, MESSAGES_SNAPSHOT</li>
- * <li>Generic: CUSTOM, RAW</li>
+ * <li>Activity: ACTIVITY_SNAPSHOT, ACTIVITY_DELTA</li>
+ * <li>Generic: CUSTOM, RAW, META_EVENT</li>
  * </ul>
  * <p>
  * This mixin enables seamless JSON serialization of event objects regardless of their
@@ -48,7 +51,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
  * }
  * }</pre>
  *
- * @author Pascal Wilbrink
  */
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.NAME,
@@ -69,16 +71,21 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @JsonSubTypes.Type(value = TextMessageContentEvent.class, name = "TEXT_MESSAGE_CONTENT"),
     @JsonSubTypes.Type(value = TextMessageEndEvent.class, name = "TEXT_MESSAGE_END"),
     @JsonSubTypes.Type(value = TextMessageStartEvent.class, name = "TEXT_MESSAGE_START"),
-    @JsonSubTypes.Type(value = ThinkingEndEvent.class, name = "THINKING_END"),
-    @JsonSubTypes.Type(value = ThinkingStartEvent.class, name = "THINKING_START"),
-    @JsonSubTypes.Type(value = ThinkingTextMessageContentEvent.class, name = "THINKING_TEXT_MESSAGE_CONTENT"),
-    @JsonSubTypes.Type(value = ThinkingTextMessageEndEvent.class, name = "THINKING_TEXT_MESSAGE_END"),
-    @JsonSubTypes.Type(value = ThinkingTextMessageStartEvent.class, name = "THINKING_TEXT_MESSAGE_START"),
+    @JsonSubTypes.Type(value = ReasoningEndEvent.class, name = "REASONING_END"),
+    @JsonSubTypes.Type(value = ReasoningEncryptedValueEvent.class, name = "REASONING_ENCRYPTED_VALUE"),
+    @JsonSubTypes.Type(value = ReasoningMessageChunkEvent.class, name = "REASONING_MESSAGE_CHUNK"),
+    @JsonSubTypes.Type(value = ReasoningMessageContentEvent.class, name = "REASONING_MESSAGE_CONTENT"),
+    @JsonSubTypes.Type(value = ReasoningMessageEndEvent.class, name = "REASONING_MESSAGE_END"),
+    @JsonSubTypes.Type(value = ReasoningMessageStartEvent.class, name = "REASONING_MESSAGE_START"),
+    @JsonSubTypes.Type(value = ReasoningStartEvent.class, name = "REASONING_START"),
+    @JsonSubTypes.Type(value = ActivityDeltaEvent.class, name = "ACTIVITY_DELTA"),
+    @JsonSubTypes.Type(value = ActivitySnapshotEvent.class, name = "ACTIVITY_SNAPSHOT"),
     @JsonSubTypes.Type(value = ToolCallArgsEvent.class, name = "TOOL_CALL_ARGS"),
     @JsonSubTypes.Type(value = ToolCallChunkEvent.class, name = "TOOL_CALL_CHUNK"),
     @JsonSubTypes.Type(value = ToolCallEndEvent.class, name = "TOOL_CALL_END"),
     @JsonSubTypes.Type(value = ToolCallResultEvent.class, name = "TOOL_CALL_RESULT"),
-    @JsonSubTypes.Type(value = ToolCallStartEvent.class, name = "TOOL_CALL_START")
+    @JsonSubTypes.Type(value = ToolCallStartEvent.class, name = "TOOL_CALL_START"),
+    @JsonSubTypes.Type(value = MetaEvent.class, name = "META_EVENT")
 })
 public interface EventMixin {
 }

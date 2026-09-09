@@ -1,22 +1,22 @@
 package org.bsc.langgraph4j.agui.sdk;
 
-import com.agui.core.agent.RunAgentParameters;
-import com.agui.core.context.Context;
-import com.agui.core.message.BaseMessage;
-import com.agui.core.state.State;
-import com.agui.core.tool.Tool;
+import com.agui.community.core.agent.Context;
+import com.agui.community.core.agent.RunAgentInput;
+import com.agui.community.core.interrupt.Resume;
+import com.agui.community.core.message.Message;
+import com.agui.community.core.tool.Tool;
 
 import java.util.List;
 
-public class AGUIParameters {
+public class AGUIRunAgentInput {
 
     private String threadId;
     private String runId;
     private List<Tool> tools;
     private List<Context> context;
     private Object forwardedProps;
-    private List<BaseMessage> messages;
-    private State state;
+    private List<Message> messages;
+    private List<Resume> resumes;
 
     /**
      * Sets the conversation thread identifier.
@@ -113,7 +113,7 @@ public class AGUIParameters {
      *
      * @param messages the list of conversation messages, or null for empty history
      */
-    public void setMessages(final List<BaseMessage> messages) {
+    public void setMessages(final List<Message> messages) {
         this.messages = messages;
     }
 
@@ -122,38 +122,28 @@ public class AGUIParameters {
      *
      * @return the list of conversation messages, or null if not set
      */
-    public List<BaseMessage> getMessages() {
+    public List<Message> getMessages() {
         return this.messages;
     }
 
-    /**
-     * Sets the agent state containing persistent context and configuration.
-     *
-     * @param state the agent state object, or null for default empty state
-     */
-    public void setState(State state) {
-        this.state = state;
+    public void setResumes(final List<Resume> resumes) {
+        this.resumes = resumes;
     }
 
-    /**
-     * Gets the agent state containing persistent context and configuration.
-     *
-     * @return the agent state object, or null if not set
-     */
-    public State getState() {
-        return state;
+    public List<Resume> getResumes() {
+        return resumes;
     }
 
-
-    public RunAgentParameters toRunAgentParameters() {
-        return RunAgentParameters.builder()
-                .threadId(getThreadId())
-                .runId(getRunId())
-                .messages(getMessages())
-                .tools(getTools())
-                .context(getContext())
-                .forwardedProps(getForwardedProps())
-                .state(getState())
-                .build();
+    public RunAgentInput toRunAgentParameters() {
+        return new RunAgentInput(
+                this.threadId,
+                this.runId,
+                null, // state is not set in this wrapper
+                this.messages ,
+                this.tools ,
+                this.context ,
+                this.forwardedProps,
+                this.resumes
+        );
     }
 }
