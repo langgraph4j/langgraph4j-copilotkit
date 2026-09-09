@@ -17,6 +17,15 @@ public class AGUIRunAgentInput {
     private Object forwardedProps;
     private List<Message> messages;
     private List<Resume> resumes;
+    private Object state;
+
+    public void setState(Object state) {
+        this.state = state;
+    }
+
+    public Object getState() {
+        return state;
+    }
 
     /**
      * Sets the conversation thread identifier.
@@ -138,7 +147,7 @@ public class AGUIRunAgentInput {
         return new RunAgentInput(
                 this.threadId,
                 this.runId,
-                null, // state is not set in this wrapper
+                state, // state is not set in this wrapper
                 this.messages ,
                 this.tools ,
                 this.context ,
