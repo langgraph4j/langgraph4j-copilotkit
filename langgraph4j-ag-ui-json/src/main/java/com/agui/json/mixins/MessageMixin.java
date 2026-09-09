@@ -1,6 +1,6 @@
 package com.agui.json.mixins;
 
-import com.agui.core.message.*;
+import com.agui.community.core.message.*;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;

@@ -1,7 +1,6 @@
 package org.bsc.langgraph4j.agui.sdk;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,12 +14,12 @@ import reactor.core.publisher.Flux;
 @Controller
 public class AGUISSEController {
 
-    private final AGUIAbstractLangGraphAgent agUiAgent;
-    private final ObjectMapper objectMapper;
+    private final AGUIAbstractLangGraphAgent aguiAgent;
+    private final com.agui.community.core.serialization.Serializer aguiSerializer;
 
-    public AGUISSEController(AGUIAbstractLangGraphAgent agUiAgent, ObjectMapper objectMapper) {
-        this.agUiAgent = agUiAgent;
-        this.objectMapper = objectMapper;
+    public AGUISSEController(AGUIAbstractLangGraphAgent aguiAgent, com.agui.community.core.serialization.Serializer  aguiSerializer) {
+        this.aguiAgent = aguiAgent;
+        this.aguiSerializer = aguiSerializer;
     }
 
     @PostMapping(
@@ -32,16 +31,16 @@ public class AGUISSEController {
     ) throws JsonProcessingException {
 
         final var emitter = new SseEmitter(0L);
-        final var parameters = objectMapper.readValue(params, AGUIParameters.class);
+        final var parameters = aguiSerializer.deserialize(params, AGUIRunAgentInput.class);
 
-        final var disposable = this.agUiAgent.run(parameters.toRunAgentParameters())
+        final var disposable = this.aguiAgent.run(parameters.toRunAgentParameters())
                 .subscribe(
                         event -> {
                             try {
                                 emitter.send(
                                         SseEmitter.event()
                                                 .name("message")
-                                                .data(objectMapper.writeValueAsString(event), MediaType.APPLICATION_JSON)
+                                                .data(aguiSerializer.serialize(event), MediaType.APPLICATION_JSON)
                                 );
                             } catch (Exception e) {
                                 emitter.completeWithError(e);
@@ -67,12 +66,12 @@ public class AGUISSEController {
     @PostMapping(value = "/flux/{agentId}")
     public Flux<String> streamDataWithFlux(@PathVariable("agentId") final String agentId, @RequestBody() String  params ) throws JsonProcessingException {
 
-        final var parameters = objectMapper.readValue(params, AGUIParameters.class);
+        final var parameters = aguiSerializer.deserialize(params, AGUIRunAgentInput.class);
 
-        return this.agUiAgent.run(parameters.toRunAgentParameters())
+        return this.aguiAgent.run(parameters.toRunAgentParameters())
                 .map( event -> {
                     try {
-                        final var json = objectMapper.writeValueAsString(event);
+                        final var json = aguiSerializer.serialize(event);
                         return " %s".formatted(json);
                     } catch (Exception e) {
                         throw new Error( e );
