@@ -39,4 +39,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN  }}
           OSS_SONATYPE_TOKEN: ${{ secrets.OSS_SONATYPE_TOKEN }}
-        run: mvn clean install && mvn -pl 'langgraph4j-ag-ui-sdk,langgraph4j-ag-ui-client' -B clean source:jar javadoc:jar install central-publishing:publish --file pom.xml -s settings-template.xml
+        run: mvn -B clean source:jar javadoc:jar install central-publishing:publish --file pom.xml -s settings-template.xml
