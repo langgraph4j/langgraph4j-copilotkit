@@ -50,7 +50,7 @@ class AGUIJacksonSerializerMessageTest {
         messageOut = serializer.deserialize(json, AssistantMessage.class);
         assertEquals("Hello, World!", messageOut.content());
         assertEquals(1, messageOut.toolCalls().size());
-        var toolCall = messageOut.toolCalls().getFirst();
+        var toolCall = messageOut.toolCalls().get(0);
         assertEquals("tool1", toolCall.id());
         assertEquals("tool_1", toolCall.function().name());
         assertEquals("{}", toolCall.function().arguments());
