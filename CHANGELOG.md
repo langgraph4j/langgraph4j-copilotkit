@@ -2,6 +2,46 @@
 
 
 
+<!-- "name: v0.2.0-beta2" is a release tag -->
+
+## [v0.2.0-beta2](https://github.com/bsorrentino/langgraph4j/releases/tag/v0.2.0-beta2) (2026-09-09)
+
+
+### Bug Fixes
+
+ -  add state property with getter and setter in AGUIRunAgentInput ([1970bc23fd17d68](https://github.com/bsorrentino/langgraph4j/commit/1970bc23fd17d68255a23212d1ab26d35082a95e))
+
+
+### Documentation
+
+ -  update changelog ([2c84e286a2b6843](https://github.com/bsorrentino/langgraph4j/commit/2c84e286a2b6843fcf5a6361abcc87396b281474))
+
+
+
+### ALM 
+
+ -  bump to next version 0.2.0-beta2 ([ce2a20ecb56b1b0](https://github.com/bsorrentino/langgraph4j/commit/ce2a20ecb56b1b09feff4d3f65320a182e3e55fc))
+   
+ -  update version from 0.2.0-beta1 to 0.2-SNAPSHOT ([02c99dd579b37ea](https://github.com/bsorrentino/langgraph4j/commit/02c99dd579b37ea8ba496e4da39a99fe7495f6ce))
+   
+ -  downgrade maven.compiler.release from 21 to 17 ([1002ffb98c577f2](https://github.com/bsorrentino/langgraph4j/commit/1002ffb98c577f2712e494382aa3280e5872adc5))
+   
+ -  add maven-compiler-plugin with test exclusions ([cdecde5c96a2071](https://github.com/bsorrentino/langgraph4j/commit/cdecde5c96a20717eeff8b4d147f6f1da2e524ad))
+   
+
+### Test 
+
+ -  fix update List.getFirst() to List.get(0) ([2428504087cdf41](https://github.com/bsorrentino/langgraph4j/commit/2428504087cdf4156e23a08ac6a9b03307f99786))
+   
+
+### Continuous Integration
+
+ -  add GPG key setup script ([58a4ef16cd7842a](https://github.com/bsorrentino/langgraph4j/commit/58a4ef16cd7842a08a92073bc67144a2f3ce695b))
+   
+
+
+
+
 <!-- "name: v0.2.0-beta1" is a release tag -->
 
 ## [v0.2.0-beta1](https://github.com/bsorrentino/langgraph4j/releases/tag/v0.2.0-beta1) (2026-09-09)
