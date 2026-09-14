@@ -47,7 +47,7 @@
             <dependency>
                 <groupId>org.bsc.langgraph4j</groupId>
                 <artifactId>langgraph4j-bom</artifactId>
-                <version>1.9.0-beta6</version>
+                <version>1.9-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
