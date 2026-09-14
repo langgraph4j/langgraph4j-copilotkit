@@ -2,6 +2,38 @@
 
 
 
+<!-- "name: v0.2.0-beta3" is a release tag -->
+
+## [v0.2.0-beta3](https://github.com/bsorrentino/langgraph4j/releases/tag/v0.2.0-beta3) (2026-09-14)
+
+### Features
+
+ *  enhance nodeOutputToEvents method to handle AGUINodeOutput ([4f48ad794d0c212](https://github.com/bsorrentino/langgraph4j/commit/4f48ad794d0c212a399fcd434db87a53cbd91ff7))
+   
+ *  add AGUINodeOutput class with builder for event management ([d2b9516f948f0ee](https://github.com/bsorrentino/langgraph4j/commit/d2b9516f948f0ee0c4bbf44b26dd2c94006e2983))
+   
+
+
+### Documentation
+
+ -  update changelog ([655e0263d7b3795](https://github.com/bsorrentino/langgraph4j/commit/655e0263d7b3795ef9c075082563de68f3573997))
+
+
+
+### ALM 
+
+ -  bump to next version 0.2.0-beta3 ([d0b2903efbadf5f](https://github.com/bsorrentino/langgraph4j/commit/d0b2903efbadf5fa1b141fd4323551a4c85dd67a))
+   
+ -  update langgraph4j-bom version to 1.9-SNAPSHOT ([8f37ad27c7fa95b](https://github.com/bsorrentino/langgraph4j/commit/8f37ad27c7fa95b1b336248073c449d00c1e0d39))
+   
+ -  bump to next dev version 0.2-SNAPSHOT ([2aa65302b32de6a](https://github.com/bsorrentino/langgraph4j/commit/2aa65302b32de6ace404408a69c3df273f753243))
+   
+
+
+
+
+
+
 <!-- "name: v0.2.0-beta2" is a release tag -->
 
 ## [v0.2.0-beta2](https://github.com/bsorrentino/langgraph4j/releases/tag/v0.2.0-beta2) (2026-09-09)
