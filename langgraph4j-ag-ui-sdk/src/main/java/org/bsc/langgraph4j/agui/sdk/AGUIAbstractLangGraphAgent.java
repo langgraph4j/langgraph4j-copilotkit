@@ -43,7 +43,12 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
 
     }
 
-    protected Collection<? extends Event> nodeOutputToEvents(RunAgentInput input, NodeOutput<? extends AgentState> output) {        return List.of();
+    protected Collection<? extends Event> nodeOutputToEvents(RunAgentInput input, NodeOutput<? extends AgentState> output) {
+
+        if( output instanceof AGUINodeOutput<? extends AgentState> aguiNodeOutput ) {
+            return aguiNodeOutput.events();
+        }
+        return List.of();
     }
 
     public final RunErrorEvent toErrorEvent(Throwable error) {
