@@ -3,10 +3,12 @@ package com.agui.json;
 import com.agui.community.core.event.Event;
 import com.agui.community.core.interrupt.InterruptOutcome;
 import com.agui.community.core.message.Message;
+import com.agui.community.core.message.Role;
 import com.agui.community.core.serialization.Serializer;
 import com.agui.json.mixins.EventMixin;
 import com.agui.json.mixins.InterruptMixin;
 import com.agui.json.mixins.MessageMixin;
+import com.agui.json.mixins.RoleMixin;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -19,6 +21,9 @@ public class AGUIJacksonSerializer implements Serializer {
 
     public AGUIJacksonSerializer(ObjectMapper objectMapper) {
         this.objectMapper = Objects.requireNonNull(objectMapper, "objectMapper must not be null");
+        if (Objects.isNull(objectMapper.findMixInClassFor(Role.class))) {
+            objectMapper.addMixIn(Role.class, RoleMixin.class);
+        }
 
         // ADD MIXINS FOR AGUI CORE CLASSES IF NOT ALREADY PRESENT
         if (Objects.isNull(objectMapper.findMixInClassFor(Message.class))) {
