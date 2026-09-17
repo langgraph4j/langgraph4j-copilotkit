@@ -28,7 +28,7 @@ class AGUIJacksonSerializerMessageTest {
         // Test serialization
         var json = serializer.serialize(messageIn);
         assertEquals("""
-                {"role":"assistant","id":"1","content":"Hello, World!","name":null,"toolCalls":[]}""",
+                {"role":"assistant","id":"1","content":"Hello, World!","toolCalls":[]}""",
                 json);
 
         // Test deserialization
@@ -64,7 +64,7 @@ class AGUIJacksonSerializerMessageTest {
         // Test serialization
         var json = serializer.serialize(messageIn);
         assertEquals("""
-                {"role":"system","id":"1","content":"Hello, World!","name":null}""",
+                {"role":"system","id":"1","content":"Hello, World!"}""",
                 json);
 
         // Test deserialization
@@ -81,7 +81,7 @@ class AGUIJacksonSerializerMessageTest {
         // Test serialization
         var json = serializer.serialize(messageIn);
         assertEquals("""
-                        {"role":"user","id":"1","content":"Hello, World!","name":null}""",
+                        {"role":"user","id":"1","content":"Hello, World!"}""",
                 json);
 
         // Test deserialization
@@ -96,7 +96,7 @@ class AGUIJacksonSerializerMessageTest {
         // Test serialization
         var json = serializer.serialize(messageIn);
         assertEquals("""
-                        {"role":"developer","id":"1","content":"Hello, World!","name":null}""",
+                        {"role":"developer","id":"1","content":"Hello, World!"}""",
                 json);
 
         // Test deserialization
@@ -111,7 +111,7 @@ class AGUIJacksonSerializerMessageTest {
         // Test serialization
         var json = serializer.serialize(messageIn);
         assertEquals("""
-                        {"role":"tool","id":"1","content":"Hello, World!","toolCallId":"tool_call_1","error":null}""",
+                        {"role":"tool","id":"1","content":"Hello, World!","toolCallId":"tool_call_1"}""",
                 json);
 
         // Test deserialization
