@@ -25,7 +25,7 @@ public class AGUIJacksonSerializerEventTest {
         // Test serialization
         var json = serializer.serialize(eventIn);
         assertEquals("""
-                {"type":"TEXT_MESSAGE_START","messageId":"1","role":"ASSISTANT","timestamp":null,"rawEvent":null}""", json);
+                {"type":"TEXT_MESSAGE_START","messageId":"1","role":"assistant"}""", json);
 
         // Test deserialization
         final TextMessageStartEvent eventOut = serializer.deserialize(json, TextMessageStartEvent.class);
@@ -44,7 +44,7 @@ public class AGUIJacksonSerializerEventTest {
         // Test serialization
         var json = serializer.serialize(eventIn);
         assertEquals("""
-                {"type":"TEXT_MESSAGE_END","messageId":"1","timestamp":%d,"rawEvent":null}"""
+                {"type":"TEXT_MESSAGE_END","messageId":"1","timestamp":%d}"""
                 .formatted(timestamp), json);
 
         // Test deserialization
