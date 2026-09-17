@@ -37,10 +37,11 @@ public class AGUISSEController {
                 .subscribe(
                         event -> {
                             try {
+                                final var data = aguiSerializer.serialize(event);
                                 emitter.send(
                                         SseEmitter.event()
-                                                .name("message")
-                                                .data(aguiSerializer.serialize(event), MediaType.APPLICATION_JSON)
+                                                .name("event")
+                                                .data(data, MediaType.APPLICATION_JSON)
                                 );
                             } catch (Exception e) {
                                 emitter.completeWithError(e);

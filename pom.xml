@@ -6,7 +6,7 @@
 
     <groupId>org.bsc.langgraph4j</groupId>
     <artifactId>langgraph4j-ag-ui-parent</artifactId>
-    <version>0.2.0-beta3</version>
+    <version>0.2.0-beta4</version>
     <packaging>pom</packaging>
 
     <name>langgraph4j::ag-ui::parent</name>
@@ -47,7 +47,7 @@
             <dependency>
                 <groupId>org.bsc.langgraph4j</groupId>
                 <artifactId>langgraph4j-bom</artifactId>
-                <version>1.9-SNAPSHOT</version>
+                <version>1.9.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

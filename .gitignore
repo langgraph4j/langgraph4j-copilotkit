@@ -36,3 +36,5 @@ build/
 
 ### Maven plugins ###
 .flattened-pom.xml
+
+skills-lock.json
