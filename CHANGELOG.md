@@ -2,6 +2,60 @@
 
 
 
+<!-- "name: vv0.2.0-beta4" is a release tag -->
+
+## [vv0.2.0-beta4](https://github.com/bsorrentino/langgraph4j/releases/tag/vv0.2.0-beta4) (2026-09-17)
+
+### Features
+
+ *  add AGUIHook interface for  graph hooks creation ([9fd1ca55cb52bdb](https://github.com/bsorrentino/langgraph4j/commit/9fd1ca55cb52bdba49673db3147929eb46f2b8cd))
+   
+ *  add copilotkit skills ([530f407dad38f44](https://github.com/bsorrentino/langgraph4j/commit/530f407dad38f4419dc3ee4fad882446adf8970d))
+   
+ *  add copilotkit skills ([656d9ece1bfb42a](https://github.com/bsorrentino/langgraph4j/commit/656d9ece1bfb42a5edd657a1659046852d0a0c98))
+   
+ *  enhance TextMessage events with timestamp support ([233ce3127cbfa81](https://github.com/bsorrentino/langgraph4j/commit/233ce3127cbfa813bec08e7cc8181426681eaa85))
+   
+ *  update AGUIJacksonSerializer to include non-null properties by default ([bc50895e7df0506](https://github.com/bsorrentino/langgraph4j/commit/bc50895e7df050634e1c17e714ee2ecb1dfdf3a5))
+   
+ *  add RoleMixin for Jackson serialization support ([e5863656ed0d11e](https://github.com/bsorrentino/langgraph4j/commit/e5863656ed0d11e24aa60f7e613ea74122bddb24))
+   
+
+
+### Documentation
+
+ -  update changelog ([7f78c824e8fb7a1](https://github.com/bsorrentino/langgraph4j/commit/7f78c824e8fb7a1bd93820ca7d6b4baef3d2c9b3))
+
+
+### Refactor
+
+ -  enhance AGUIJacksonSerializer initialization with custom ObjectMapper ([c34217ecf6d0f4a](https://github.com/bsorrentino/langgraph4j/commit/c34217ecf6d0f4af3706b45b2b0d8e74e518df06))
+   
+ -  simplify AGUISerializer initialization ([6a3587f966171a0](https://github.com/bsorrentino/langgraph4j/commit/6a3587f966171a0cca06d3ad4db299fb34ac5f37))
+   
+ -  move to copilotkit 4 ([1745c146bea3d24](https://github.com/bsorrentino/langgraph4j/commit/1745c146bea3d241ad382e31a28e46437412213c))
+   
+
+### ALM 
+
+ -  bump to next version 0.2.0-beta4 ([5c7ed7114843d5f](https://github.com/bsorrentino/langgraph4j/commit/5c7ed7114843d5fec48754d97e9edfa34e548a2d))
+   
+ -  move to SNAPSHOT ([5def9667d4152de](https://github.com/bsorrentino/langgraph4j/commit/5def9667d4152deddd53f37924c445214e910496))
+   
+ -  add skills-lock.json to .gitignore ([9ece922936c7035](https://github.com/bsorrentino/langgraph4j/commit/9ece922936c7035186e160dfebd813cfc623f2de))
+   
+
+### Test 
+
+ -  update AGUIJacksonSerializerMessageTest to reflect changes in serialized output ([ce2e8c406de07c9](https://github.com/bsorrentino/langgraph4j/commit/ce2e8c406de07c9f842e2c5d6a2653725dfdc39a))
+   
+ -  update AGUIJacksonSerializerEventTest to reflect changes in serialized output ([4ac959f51a87d3f](https://github.com/bsorrentino/langgraph4j/commit/4ac959f51a87d3fee98ee67dcd427aae389731db))
+   
+
+
+
+
+
 <!-- "name: v0.2.0-beta3" is a release tag -->
 
 ## [v0.2.0-beta3](https://github.com/bsorrentino/langgraph4j/releases/tag/v0.2.0-beta3) (2026-09-14)
