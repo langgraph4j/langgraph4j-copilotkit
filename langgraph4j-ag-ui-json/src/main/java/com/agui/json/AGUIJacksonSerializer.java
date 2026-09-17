@@ -9,8 +9,13 @@ import com.agui.json.mixins.EventMixin;
 import com.agui.json.mixins.InterruptMixin;
 import com.agui.json.mixins.MessageMixin;
 import com.agui.json.mixins.RoleMixin;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.StreamReadFeature;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 
 import java.util.List;
 import java.util.Objects;
@@ -19,8 +24,18 @@ public class AGUIJacksonSerializer implements Serializer {
 
     private final ObjectMapper objectMapper;
 
-    public AGUIJacksonSerializer(ObjectMapper objectMapper) {
-        this.objectMapper = Objects.requireNonNull(objectMapper, "objectMapper must not be null");
+    public AGUIJacksonSerializer() {
+
+        JsonFactory factory = JsonFactory.builder()
+                .enable(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION)
+                .build();
+
+        objectMapper = JsonMapper.builder(factory)
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .defaultPropertyInclusion(JsonInclude.Value.ALL_NON_NULL)
+                .build();
+
+
         if (Objects.isNull(objectMapper.findMixInClassFor(Role.class))) {
             objectMapper.addMixIn(Role.class, RoleMixin.class);
         }
@@ -35,10 +50,6 @@ public class AGUIJacksonSerializer implements Serializer {
         if (Objects.isNull(objectMapper.findMixInClassFor(InterruptOutcome.class))) {
             objectMapper.addMixIn(InterruptOutcome.class, InterruptMixin.class);
         }
-    }
-
-    public AGUIJacksonSerializer() {
-        this(new ObjectMapper());
     }
 
     @Override
