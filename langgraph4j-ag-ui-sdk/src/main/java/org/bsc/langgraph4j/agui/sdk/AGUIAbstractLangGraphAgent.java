@@ -78,14 +78,21 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
                                 if (messageId == null) {
                                     log.trace("STREAMING START");
                                     messageId = streamingId.updateAndGet(v -> newMessageId());
-                                    emitter.next( new TextMessageStartEvent(messageId, Role.ASSISTANT));
+                                    emitter.next( new TextMessageStartEvent(
+                                            messageId,
+                                            Role.ASSISTANT,
+                                            System.currentTimeMillis(),
+                                            null) );
                                     //continue;
                                     return;
                                 }
                                 if (output.isStreamingEnd()) { // is streaming out ended
                                     log.trace("STREAMING END");
                                     streamingId.set(null);
-                                    emitter.next(new TextMessageEndEvent(messageId));
+                                    emitter.next(new TextMessageEndEvent(
+                                            messageId,
+                                            System.currentTimeMillis(),
+                                            null));
                                     //continue;
                                     return;
                                 }
@@ -94,7 +101,11 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
                                     log.trace("STREAMING CHUNK IS EMPTY");
                                 } else {
                                     log.trace("{}", output.chunk());
-                                    emitter.next(new TextMessageContentEvent(messageId, output.chunk()));
+                                    emitter.next(new TextMessageContentEvent(
+                                            messageId,
+                                            output.chunk(),
+                                            System.currentTimeMillis(),
+                                            null));
                                 }
                             } else {
 
@@ -123,16 +134,22 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
                                             approval.toolId(),
                                             approval.toolName(),
                                             messageId,
-                                            null,
+                                            System.currentTimeMillis(),
                                             null
                                     ));
 
                                     emitter.next(new ToolCallArgsEvent(
                                             approval.toolArgs(),
-                                            approval.toolId()
+                                            approval.toolId(),
+                                            System.currentTimeMillis(),
+                                            null
                                     ));
 
-                                    emitter.next(new ToolCallEndEvent(approval.toolId()));
+                                    emitter.next(new ToolCallEndEvent(
+                                            approval.toolId(),
+                                            System.currentTimeMillis(),
+                                            null
+                                    ));
 
                                 });
 
@@ -165,12 +182,23 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
 
             });
             return Mono.<Event>just(
-                            new RunStartedEvent(input.threadId(), input.runId())
+                            new RunStartedEvent(
+                                    input.threadId(),
+                                    input.runId(),
+                                    null,
+                                    null,
+                                    System.currentTimeMillis(),
+                                    null)
                     )
                     .concatWith(outputFlux.subscribeOn(Schedulers.immediate()))
                     .concatWith(
                             Mono.<Event>just(
-                                    new RunFinishedEvent(input.threadId(), input.runId())));
+                                    new RunFinishedEvent(
+                                            input.threadId(),
+                                            input.runId(),
+                                            null,
+                                            null, System.currentTimeMillis(),
+                                            null)));
 
         } catch (Exception e) {
             return Flux.error(e);
