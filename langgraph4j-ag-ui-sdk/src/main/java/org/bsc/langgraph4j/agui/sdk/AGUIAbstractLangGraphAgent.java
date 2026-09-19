@@ -2,6 +2,9 @@ package org.bsc.langgraph4j.agui.sdk;
 
 import com.agui.community.core.agent.RunAgentInput;
 import com.agui.community.core.event.*;
+import com.agui.community.core.interrupt.Interrupt;
+import com.agui.community.core.interrupt.InterruptOutcome;
+import com.agui.community.core.interrupt.SuccessOutcome;
 import com.agui.community.core.message.Role;
 import org.bsc.langgraph4j.*;
 import org.bsc.langgraph4j.action.InterruptionMetadata;
@@ -9,6 +12,7 @@ import org.bsc.langgraph4j.state.AgentState;
 import org.bsc.langgraph4j.streaming.StreamingOutput;
 import org.bsc.langgraph4j.utils.TryFunction;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -17,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 import static java.util.Optional.ofNullable;
 
@@ -30,7 +35,7 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
 
     protected abstract GraphInput buildGraphInput(RunAgentInput input, boolean resume);
 
-    protected abstract <S extends AgentState> List<Approval> onInterruption(RunAgentInput input, InterruptionMetadata<S> state);
+    protected abstract <S extends AgentState> AGUINodeOutput<S> onInterruption(RunAgentInput input, InterruptionMetadata<S> state);
 
     protected String newMessageId() {
         return String.valueOf(System.currentTimeMillis());
@@ -127,31 +132,9 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
 
                                 graphByThread.put(input.threadId(), graphData.withInterruption(true));
 
-                                onInterruption(input, interruptionMetadata).forEach(approval -> {
-                                    final var messageId = newMessageId();
+                                final var output = onInterruption(input, interruptionMetadata);
 
-                                    emitter.next(new ToolCallStartEvent(
-                                            approval.toolId(),
-                                            approval.toolName(),
-                                            messageId,
-                                            System.currentTimeMillis(),
-                                            null
-                                    ));
-
-                                    emitter.next(new ToolCallArgsEvent(
-                                            approval.toolArgs(),
-                                            approval.toolId(),
-                                            System.currentTimeMillis(),
-                                            null
-                                    ));
-
-                                    emitter.next(new ToolCallEndEvent(
-                                            approval.toolId(),
-                                            System.currentTimeMillis(),
-                                            null
-                                    ));
-
-                                });
+                                nodeOutputToEvents(input, output).forEach(emitter::next);
 
                             } else {
                                 graphByThread.put(input.threadId(), graphData.withInterruption(false));
@@ -160,6 +143,14 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
                                 //graphByThread.remove(input.threadId());
                                 //var tag = saver.release( runnableConfig );
                                 //log.debug( "thread '{}' released", tag.threadId() );
+
+                                emitter.next(new RunFinishedEvent(
+                                        input.threadId(),
+                                        input.runId(),
+                                        new SuccessOutcome(),
+                                        null,
+                                        System.currentTimeMillis(),
+                                        null));
 
                             }
                         }).whenComplete((ignored, throwable) -> {
@@ -190,15 +181,7 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
                                     System.currentTimeMillis(),
                                     null)
                     )
-                    .concatWith(outputFlux.subscribeOn(Schedulers.immediate()))
-                    .concatWith(
-                            Mono.<Event>just(
-                                    new RunFinishedEvent(
-                                            input.threadId(),
-                                            input.runId(),
-                                            null,
-                                            null, System.currentTimeMillis(),
-                                            null)));
+                    .concatWith(outputFlux.subscribeOn(Schedulers.immediate()));
 
         } catch (Exception e) {
             return Flux.error(e);
