@@ -9,6 +9,7 @@ node_modules
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+package-lock.json
 
 # testing
 coverage
@@ -43,12 +44,12 @@ yarn-error.log*
 next-env.d.ts
 
 
-# LangGraph API
-.langgraph_api
-
 # Git worktrees
 .worktrees
 
 # Tools
 .claude
 .scratch/
+
+# BUN
+bun.lock
