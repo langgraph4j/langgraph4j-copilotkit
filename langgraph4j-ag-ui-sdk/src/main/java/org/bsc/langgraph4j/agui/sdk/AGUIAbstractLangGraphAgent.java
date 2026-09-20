@@ -33,7 +33,7 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
 
     protected abstract GraphData buildStateGraph() throws GraphStateException;
 
-    protected abstract GraphInput buildGraphInput(RunAgentInput input, boolean resume);
+    protected abstract GraphInput buildGraphInput(RunAgentInput input);
 
     protected abstract <S extends AgentState> AGUINodeOutput<S> onInterruption(RunAgentInput input, InterruptionMetadata<S> state);
 
@@ -71,7 +71,7 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
 
             final var runnableConfig = buildRunnableConfig(input);
 
-            final GraphInput graphInput = buildGraphInput(input, graphData.interruption());
+            final GraphInput graphInput = buildGraphInput(input);
 
             final var outputFlux = Flux.<Event>create(emitter -> {
 
