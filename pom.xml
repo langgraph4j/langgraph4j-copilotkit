@@ -6,7 +6,7 @@
 
     <groupId>org.bsc.langgraph4j</groupId>
     <artifactId>langgraph4j-ag-ui-parent</artifactId>
-    <version>0.2.0-beta4</version>
+    <version>0.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>langgraph4j::ag-ui::parent</name>
@@ -39,7 +39,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>17</maven.compiler.release>
-        <ag-ui.version>0.1.0</ag-ui.version>
+        <ag-ui.version>0.1.1</ag-ui.version>
     </properties>
 
     <dependencyManagement>
