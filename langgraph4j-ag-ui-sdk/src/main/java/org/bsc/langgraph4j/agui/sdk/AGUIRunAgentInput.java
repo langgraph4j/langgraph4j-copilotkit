@@ -16,7 +16,7 @@ public class AGUIRunAgentInput {
     private List<Context> context;
     private Object forwardedProps;
     private List<Message> messages;
-    private List<Resume> resumes;
+    private List<Resume> resume;
     private Object state;
 
     public void setState(Object state) {
@@ -135,12 +135,12 @@ public class AGUIRunAgentInput {
         return this.messages;
     }
 
-    public void setResumes(final List<Resume> resumes) {
-        this.resumes = resumes;
+    public void setResume(final List<Resume> resume) {
+        this.resume = resume;
     }
 
-    public List<Resume> getResumes() {
-        return resumes;
+    public List<Resume> getResume() {
+        return resume;
     }
 
     public RunAgentInput toRunAgentParameters() {
@@ -152,7 +152,7 @@ public class AGUIRunAgentInput {
                 this.tools ,
                 this.context ,
                 this.forwardedProps,
-                this.resumes
+                this.resume
         );
     }
 }

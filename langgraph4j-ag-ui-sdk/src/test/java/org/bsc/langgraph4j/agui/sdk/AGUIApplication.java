@@ -10,7 +10,8 @@ public class AGUIApplication {
     @Bean
     AGUIAbstractLangGraphAgent createAgentExecutor() {
 
-        return new AGUIAgentExecutor();
+        return new AGUIAgentExecutorINTERRUPT();
+        //return new AGUIAgentExecutorHITL();
     }
 
     public static void main(String[] args) {

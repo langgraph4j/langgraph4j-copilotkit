@@ -4,7 +4,7 @@ import com.agui.community.core.message.Role;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public interface   RoleMixin {
+public interface EnumWithValueMixin {
 
     @JsonValue
     String value();

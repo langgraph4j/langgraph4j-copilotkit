@@ -1,14 +1,18 @@
 package com.agui.json;
 
 import com.agui.community.core.event.Event;
-import com.agui.community.core.interrupt.InterruptOutcome;
+import com.agui.community.core.interrupt.OutcomeType;
+import com.agui.community.core.interrupt.Resume;
+import com.agui.community.core.interrupt.ResumeStatus;
+import com.agui.community.core.interrupt.RunOutcome;
 import com.agui.community.core.message.Message;
 import com.agui.community.core.message.Role;
 import com.agui.community.core.serialization.Serializer;
 import com.agui.json.mixins.EventMixin;
-import com.agui.json.mixins.InterruptMixin;
 import com.agui.json.mixins.MessageMixin;
-import com.agui.json.mixins.RoleMixin;
+import com.agui.json.mixins.EnumWithValueMixin;
+import com.agui.json.mixins.OutcomeMixin;
+import com.agui.json.mixins.ResumeMixin;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.StreamReadFeature;
@@ -37,7 +41,13 @@ public class AGUIJacksonSerializer implements Serializer {
 
 
         if (Objects.isNull(objectMapper.findMixInClassFor(Role.class))) {
-            objectMapper.addMixIn(Role.class, RoleMixin.class);
+            objectMapper.addMixIn(Role.class, EnumWithValueMixin.class);
+        }
+        if (Objects.isNull(objectMapper.findMixInClassFor(OutcomeType.class))) {
+            objectMapper.addMixIn(OutcomeType.class, EnumWithValueMixin.class);
+        }
+        if (Objects.isNull(objectMapper.findMixInClassFor(ResumeStatus.class))) {
+            objectMapper.addMixIn(ResumeStatus.class, EnumWithValueMixin.class);
         }
 
         // ADD MIXINS FOR AGUI CORE CLASSES IF NOT ALREADY PRESENT
@@ -47,8 +57,11 @@ public class AGUIJacksonSerializer implements Serializer {
         if (Objects.isNull(objectMapper.findMixInClassFor(Event.class))) {
             objectMapper.addMixIn(Event.class, EventMixin.class);
         }
-        if (Objects.isNull(objectMapper.findMixInClassFor(InterruptOutcome.class))) {
-            objectMapper.addMixIn(InterruptOutcome.class, InterruptMixin.class);
+        if (Objects.isNull(objectMapper.findMixInClassFor(RunOutcome.class))) {
+            objectMapper.addMixIn(RunOutcome.class, OutcomeMixin.class);
+        }
+        if (Objects.isNull(objectMapper.findMixInClassFor(Resume.class))) {
+            objectMapper.addMixIn(Resume.class, ResumeMixin.class);
         }
     }
 
