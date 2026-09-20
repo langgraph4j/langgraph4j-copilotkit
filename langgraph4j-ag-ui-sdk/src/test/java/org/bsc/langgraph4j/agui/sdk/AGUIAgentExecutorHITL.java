@@ -19,7 +19,7 @@ import java.util.*;
 import static org.bsc.langgraph4j.GraphDefinition.END;
 import static org.bsc.langgraph4j.utils.CollectionsUtils.lastOf;
 
-public class AGUIAgentExecutor extends AGUIAbstractLangGraphAgent {
+public class AGUIAgentExecutorHITL extends AGUIAbstractLangGraphAgent {
 
     private final MemorySaver saver = new MemorySaver();
 
