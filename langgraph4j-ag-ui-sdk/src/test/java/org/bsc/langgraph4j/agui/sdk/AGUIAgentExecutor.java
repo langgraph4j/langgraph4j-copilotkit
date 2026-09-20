@@ -56,18 +56,18 @@ public class AGUIAgentExecutor extends AGUIAbstractLangGraphAgent {
     }
 
     @Override
-    protected GraphInput buildGraphInput(RunAgentInput input, boolean resume) {
-
+    protected GraphInput buildGraphInput(RunAgentInput input) {
         var lastUserMessage = lastOf(input.messages())
                 .map(com.agui.community.core.message.Message::content)
                 .orElseThrow(() -> new IllegalStateException("last user message not found"));
 
         log.debug("LAST USER MESSAGE: {}", lastUserMessage);
 
-        return (resume) ?
-                GraphInput.resume(Map.of(AgentEx.APPROVAL_RESULT, lastUserMessage)) :
-                GraphInput.args(Map.of("messages", new UserMessage(lastUserMessage)));
+        if (input.state() instanceof Map<?, ?> state && Boolean.TRUE.equals(state.get("resume"))) {
+            return GraphInput.resume(Map.of(AgentEx.APPROVAL_RESULT, lastUserMessage));
+        }
 
+        return GraphInput.args(Map.of("messages", new UserMessage(lastUserMessage)));
     }
 
     @Override
@@ -88,32 +88,25 @@ public class AGUIAgentExecutor extends AGUIAbstractLangGraphAgent {
                                     UUID.randomUUID().toString() :
                                     toolCall.id();
 
-                            outputBuilder.addEvent(new ToolCallStartEvent(
+                            outputBuilder.addEvent(new ToolCallChunkEvent(
                                     toolCallId,
                                     toolCall.name(),
                                     null,
-                                    System.currentTimeMillis(),
-                                    null
-                            ));
-                            outputBuilder.addEvent(new ToolCallArgsEvent(
-                                    toolCallId,
                                     toolCall.arguments(),
                                     System.currentTimeMillis(),
                                     null
                             ));
-                            outputBuilder.addEvent(new ToolCallEndEvent(
-                                    toolCallId,
-                                    System.currentTimeMillis(),
-                                    null
-                            ));
                         }));
-        //StateDeltaEvent
         return outputBuilder
+                .addEvent(new StateDeltaEvent(
+                        List.of( new JsonPatchOperation( "add", "/resume", true) ),
+                        System.currentTimeMillis(),
+                        null))
                 .addEvent(new RunFinishedEvent(
                         input.threadId(),
                         input.runId(),
                         new SuccessOutcome(),
-                        Map.of("resume", true),
+                        null,
                         System.currentTimeMillis(),
                         null))
                 .build(interruptionMetadata.nodeId(), interruptionMetadata.state());
