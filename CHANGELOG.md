@@ -2,9 +2,89 @@
 
 
 
-<!-- "name: vv0.2.0-beta4" is a release tag -->
+<!-- "name: v0.2.0" is a release tag -->
 
-## [vv0.2.0-beta4](https://github.com/bsorrentino/langgraph4j/releases/tag/vv0.2.0-beta4) (2026-09-17)
+## [v0.2.0](https://github.com/bsorrentino/langgraph4j/releases/tag/v0.2.0) (2026-09-20)
+
+### Features
+
+ *  update HomePage to use SimpleChatINTERRUPT component ([14db952c1438271](https://github.com/bsorrentino/langgraph4j/commit/14db952c14382716376ae1dd81c5180b63b9eff0))
+   
+ *  add EmailApprovalCard component for email approval interactions ([de0888ed6242aa2](https://github.com/bsorrentino/langgraph4j/commit/de0888ed6242aa2f258db26bb53130a689991538))
+   
+ *  add SimpleChatINTERRUPT component for handling email approval interactions ([6933a387bbc0af8](https://github.com/bsorrentino/langgraph4j/commit/6933a387bbc0af805da8e56d7d40c3b39719081c))
+   
+ *  add SimpleChatHITL component for email approval interactions ([9f378d949605644](https://github.com/bsorrentino/langgraph4j/commit/9f378d949605644b2dad34b2ef8c9172754a4405))
+   
+ *  update AGUIApplication to use AGUIAgentExecutorINTERRUPT ([f715da6adac4344](https://github.com/bsorrentino/langgraph4j/commit/f715da6adac4344dff74c3e57c3d6db1e2a13744))
+   
+ *  implement AGUIAgentExecutorINTERRUPT for handling agent interruptions ([2d2a734cba76864](https://github.com/bsorrentino/langgraph4j/commit/2d2a734cba7686414ced48889c34dfef4b8300ed))
+   
+ *  add ResumeMixin for JSON serialization of Resume objects ([fccb321c333a911](https://github.com/bsorrentino/langgraph4j/commit/fccb321c333a91175c5c3e4d1cf76372c4d47193))
+   
+ *  add ResumeMixin for JSON serialization of Resume objects ([b484f709c939db3](https://github.com/bsorrentino/langgraph4j/commit/b484f709c939db363eb233b57d1a7045c4725375))
+   
+
+### Bug Fixes
+
+ -  rename resumes to resume in AGUIRunAgentInput ([3809e4fac84e713](https://github.com/bsorrentino/langgraph4j/commit/3809e4fac84e713b954382843b3c9e913f90f0a8))
+
+
+### Documentation
+
+ -  update changelog ([f51333b56c7b028](https://github.com/bsorrentino/langgraph4j/commit/f51333b56c7b028d6cc6d232f692791492aac1e5))
+
+
+### Refactor
+
+ -  rename AGUIAgentExecutor to AGUIAgentExecutorHITL ([c86fa3631818b45](https://github.com/bsorrentino/langgraph4j/commit/c86fa3631818b45a88c61e46a1de178aad5b6813))
+   
+ -  update AGUIAbstractLangGraphAgent to use CompiledGraph and rename onInterruption to onCompletion ([fdd127e8f86152c](https://github.com/bsorrentino/langgraph4j/commit/fdd127e8f86152cd6775e9bbdcc01b6aa097ed50))
+   
+ -  simplify buildGraphInput method signature by removing resume parameter. the parameters will be shared using state ([8a86c0ae5daa7e8](https://github.com/bsorrentino/langgraph4j/commit/8a86c0ae5daa7e84b47be99279644accdf4cf42c))
+   
+ -  update onInterruption method to return AGUINodeOutput and streamline event emissions ([5eb9047d8ec745f](https://github.com/bsorrentino/langgraph4j/commit/5eb9047d8ec745faaef52419102b38885aed67d8))
+   
+ -  rename InterruptOutcome and update mixin classes for serialization ([c2de55dc9c784b3](https://github.com/bsorrentino/langgraph4j/commit/c2de55dc9c784b357649c17269b0343ab387fd71))
+   
+ -  rename InterruptMixin to OutcomeMixin and update JsonSubTypes order ([57d55f8aa1b5627](https://github.com/bsorrentino/langgraph4j/commit/57d55f8aa1b562725cdce402087ecea8e55dc52a))
+   
+ -  rename RoleMixin to EnumWithValueMixin ([6310efafb592509](https://github.com/bsorrentino/langgraph4j/commit/6310efafb5925098711e18818b8f09726af37d6c))
+   
+
+### ALM 
+
+ -  bump to next version 0.2.0 ([2ca628565613c0b](https://github.com/bsorrentino/langgraph4j/commit/2ca628565613c0b56103346a550f97f051728fbd))
+   
+ -  update version to 0.2-SNAPSHOT in pom.xml ([3755bd92f8b7107](https://github.com/bsorrentino/langgraph4j/commit/3755bd92f8b7107942ead72926b28e313139ff56))
+   
+ -  update version to 0.2-SNAPSHOT in pom.xml ([73f68bbcd4b8f3a](https://github.com/bsorrentino/langgraph4j/commit/73f68bbcd4b8f3a3bbde5c7fb2e3ab37ea6949e8))
+   
+ -  enable parameters for maven-compiler-plugin in pom.xml ([b59ca8c6b2c5505](https://github.com/bsorrentino/langgraph4j/commit/b59ca8c6b2c55057288a29f0b838023fb5acf841))
+   
+ -  update ag-ui.version to 0.1.1 in pom.xml ([d1d4dec93ed2fe5](https://github.com/bsorrentino/langgraph4j/commit/d1d4dec93ed2fe511d3a2a6ca2330259a77fa72d))
+   
+ -  re-add ag-ui submodule ([fb9e97221828cbf](https://github.com/bsorrentino/langgraph4j/commit/fb9e97221828cbfc9e437b16897d3b14994a86f0))
+   
+
+### Test 
+
+ -  add unit tests for AGUIJacksonSerializer Resume serialization ([897668c5a4954d1](https://github.com/bsorrentino/langgraph4j/commit/897668c5a4954d1ba1b8a06d34831fee230cbc3b))
+   
+ -  rename onInterruption to onCompletion and update buildStateGraph return type ([bf0114aac4c582e](https://github.com/bsorrentino/langgraph4j/commit/bf0114aac4c582efd41ed4af05cee60ee2a2397a))
+   
+ -  update buildGraphInput method to remove resume parameter and use state for resume logic ([5db2ffb43dc12f0](https://github.com/bsorrentino/langgraph4j/commit/5db2ffb43dc12f0dd5de216f761c44add7123a77))
+   
+ -  update onInterruption method to return AGUINodeOutput and enhance event handling ([c754f60820a6d5d](https://github.com/bsorrentino/langgraph4j/commit/c754f60820a6d5dcace037bd2f5d7e9b3945e0d3))
+   
+
+
+
+
+
+<!-- "name: v0.2.0-beta4" is a release tag -->
+
+## [v0.2.0-beta4](https://github.com/bsorrentino/langgraph4j/releases/tag/v0.2.0-beta4) (2026-09-17)
 
 ### Features
 
