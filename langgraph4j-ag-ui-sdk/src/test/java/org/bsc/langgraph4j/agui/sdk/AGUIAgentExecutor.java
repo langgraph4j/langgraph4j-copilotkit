@@ -3,10 +3,7 @@ package org.bsc.langgraph4j.agui.sdk;
 import com.agui.community.core.agent.RunAgentInput;
 import com.agui.community.core.event.*;
 import com.agui.community.core.interrupt.SuccessOutcome;
-import org.bsc.langgraph4j.CompileConfig;
-import org.bsc.langgraph4j.GraphInput;
-import org.bsc.langgraph4j.GraphRepresentation;
-import org.bsc.langgraph4j.GraphStateException;
+import org.bsc.langgraph4j.*;
 import org.bsc.langgraph4j.action.InterruptionMetadata;
 import org.bsc.langgraph4j.agent.AgentEx;
 import org.bsc.langgraph4j.checkpoint.MemorySaver;
@@ -17,10 +14,9 @@ import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
 
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
+import static org.bsc.langgraph4j.GraphDefinition.END;
 import static org.bsc.langgraph4j.utils.CollectionsUtils.lastOf;
 
 public class AGUIAgentExecutor extends AGUIAbstractLangGraphAgent {
@@ -28,11 +24,7 @@ public class AGUIAgentExecutor extends AGUIAbstractLangGraphAgent {
     private final MemorySaver saver = new MemorySaver();
 
     @Override
-    protected GraphData buildStateGraph() throws GraphStateException {
-
-//        var model = ofNullable(System.getenv("OPENAI_API_KEY"))
-//                .map( key -> AiModel.OPENAI.chatModel("gpt-4o-mini"))
-//                .orElseGet( () -> AiModel.OLLAMA.chatModel("qwen3.5") );
+    protected CompiledGraph<? extends AgentState> buildStateGraph() throws GraphStateException {
 
         var agent = AgentExecutorEx.builder()
                 .chatModel(AiModel.OLLAMA.chatModel("qwen3.5"))
@@ -52,7 +44,7 @@ public class AGUIAgentExecutor extends AGUIAbstractLangGraphAgent {
 
         var compileConfig = CompileConfig.builder().checkpointSaver(saver).build();
 
-        return new GraphData(agent.compile(compileConfig));
+        return agent.compile(compileConfig);
     }
 
     @Override
@@ -71,45 +63,73 @@ public class AGUIAgentExecutor extends AGUIAbstractLangGraphAgent {
     }
 
     @Override
-    protected <S extends AgentState> AGUINodeOutput<S> onInterruption(RunAgentInput input, InterruptionMetadata<S> interruptionMetadata) {
-
-        final var messages = interruptionMetadata.state().<List<Message>>value("messages")
-                .orElseThrow(() -> new IllegalStateException("messages not found into given state"));
+    protected <S extends AgentState> AGUINodeOutput<S> onCompletion(RunAgentInput input, GraphResult result) {
 
         final var outputBuilder = AGUINodeOutput.<S>builder();
 
-        lastOf(messages)
-                .flatMap(MessageUtil::asAssistantMessage)
-                .filter(AssistantMessage::hasToolCalls)
-                .map(AssistantMessage::getToolCalls)
-                .ifPresent(toolCalls ->
-                        toolCalls.forEach(toolCall -> {
-                            var toolCallId = toolCall.id().isBlank() ?
-                                    UUID.randomUUID().toString() :
-                                    toolCall.id();
+        final var agent = this.<S>currentGraph(input).orElseThrow(() -> new IllegalStateException("current graph not found"));
 
-                            outputBuilder.addEvent(new ToolCallChunkEvent(
-                                    toolCallId,
-                                    toolCall.name(),
-                                    null,
-                                    toolCall.arguments(),
-                                    System.currentTimeMillis(),
-                                    null
-                            ));
-                        }));
-        return outputBuilder
-                .addEvent(new StateDeltaEvent(
-                        List.of( new JsonPatchOperation( "add", "/resume", true) ),
-                        System.currentTimeMillis(),
-                        null))
-                .addEvent(new RunFinishedEvent(
-                        input.threadId(),
-                        input.runId(),
-                        new SuccessOutcome(),
-                        null,
-                        System.currentTimeMillis(),
-                        null))
-                .build(interruptionMetadata.nodeId(), interruptionMetadata.state());
+        if (result.isInterruptionMetadata()) {
+
+            final var interruptionMetadata = result.<S>asInterruptionMetadata();
+
+            log.trace("INTERRUPTION DETECTED: {}", interruptionMetadata);
+
+            final var messages = interruptionMetadata.state().<List<Message>>value("messages")
+                    .orElseThrow(() -> new IllegalStateException("messages not found into given state"));
+
+
+            lastOf(messages)
+                    .flatMap(MessageUtil::asAssistantMessage)
+                    .filter(AssistantMessage::hasToolCalls)
+                    .map(AssistantMessage::getToolCalls)
+                    .ifPresent(toolCalls ->
+                            toolCalls.forEach(toolCall -> {
+                                var toolCallId = toolCall.id().isBlank() ?
+                                        UUID.randomUUID().toString() :
+                                        toolCall.id();
+
+                                outputBuilder.addEvent(new ToolCallChunkEvent(
+                                        toolCallId,
+                                        toolCall.name(),
+                                        null,
+                                        toolCall.arguments(),
+                                        System.currentTimeMillis(),
+                                        null
+                                ));
+                            }));
+            return outputBuilder
+                    .addEvent(new StateDeltaEvent(
+                            List.of(new JsonPatchOperation("add", "/resume", true)),
+                            System.currentTimeMillis(),
+                            null))
+                    .addEvent(new RunFinishedEvent(
+                            input.threadId(),
+                            input.runId(),
+                            new SuccessOutcome(),
+                            null,
+                            System.currentTimeMillis(),
+                            null))
+                    .build(interruptionMetadata.nodeId(), interruptionMetadata.state());
+        }
+        else {
+            return outputBuilder
+                    .addEvent(new StateDeltaEvent(
+                            List.of(
+                                new JsonPatchOperation("add", "/resume", false),
+                                new JsonPatchOperation( "remove", "/resume", null )
+                            ),
+                            System.currentTimeMillis(),
+                            null))
+                    .addEvent(new RunFinishedEvent(
+                            input.threadId(),
+                            input.runId(),
+                            new SuccessOutcome(),
+                            null,
+                            System.currentTimeMillis(),
+                            null))
+                    .build(END, agent.stateGraph.getStateFactory().apply( result.asStateDataOrLastCheckpointStateData() ));
+        }
 
     }
 }
