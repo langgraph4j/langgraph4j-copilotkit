@@ -2,40 +2,34 @@ package org.bsc.langgraph4j.agui.sdk;
 
 import com.agui.community.core.agent.RunAgentInput;
 import com.agui.community.core.event.*;
-import com.agui.community.core.interrupt.Interrupt;
-import com.agui.community.core.interrupt.InterruptOutcome;
-import com.agui.community.core.interrupt.SuccessOutcome;
 import com.agui.community.core.message.Role;
 import org.bsc.langgraph4j.*;
-import org.bsc.langgraph4j.action.InterruptionMetadata;
 import org.bsc.langgraph4j.state.AgentState;
 import org.bsc.langgraph4j.streaming.StreamingOutput;
 import org.bsc.langgraph4j.utils.TryFunction;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 
 import static java.util.Optional.ofNullable;
 
 public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
 
-
-    private final Map<String, GraphData> graphByThread = new ConcurrentHashMap<>();
+    private final Map<String, CompiledGraph<? extends AgentState>> graphByThread = new ConcurrentHashMap<>();
     private final AtomicReference<String> streamingId = new AtomicReference<>();
 
-    protected abstract GraphData buildStateGraph() throws GraphStateException;
+    protected abstract CompiledGraph<? extends AgentState> buildStateGraph() throws GraphStateException;
 
     protected abstract GraphInput buildGraphInput(RunAgentInput input);
 
-    protected abstract <S extends AgentState> AGUINodeOutput<S> onInterruption(RunAgentInput input, InterruptionMetadata<S> state);
+    protected abstract <S extends AgentState> AGUINodeOutput<S> onCompletion(RunAgentInput input, GraphResult state);
 
     protected String newMessageId() {
         return String.valueOf(System.currentTimeMillis());
@@ -45,14 +39,17 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
         return RunnableConfig.builder()
                 .threadId(input.threadId())
                 .build();
-
     }
 
     protected Collection<? extends Event> nodeOutputToEvents(RunAgentInput input, NodeOutput<? extends AgentState> output) {
 
-        if( output instanceof AGUINodeOutput<? extends AgentState> aguiNodeOutput ) {
+        if (output instanceof AGUINodeOutput<? extends AgentState> aguiNodeOutput) {
             return aguiNodeOutput.events();
         }
+        return List.of();
+    }
+
+    protected Collection<? extends Event> initEvents(RunAgentInput input) {
         return List.of();
     }
 
@@ -60,14 +57,19 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
         return new RunErrorEvent(ofNullable(error.getMessage()).orElseGet(error::toString));
     }
 
+    @SuppressWarnings("unchecked")
+    public final <S extends AgentState> Optional<CompiledGraph<S>> currentGraph(RunAgentInput input) {
+        return ofNullable( graphByThread.get(input.threadId()))
+                .map( g -> (CompiledGraph<S>)g);
+    }
+
     public final Flux<? extends Event> run(RunAgentInput input) {
 
-        final var graphData = graphByThread.computeIfAbsent(input.threadId(),
+        final var agent = graphByThread.computeIfAbsent(input.threadId(),
                 TryFunction.Try(k -> buildStateGraph()));
 
         try {
 
-            final var agent = graphData.compiledGraph();
 
             final var runnableConfig = buildRunnableConfig(input);
 
@@ -83,11 +85,11 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
                                 if (messageId == null) {
                                     log.trace("STREAMING START");
                                     messageId = streamingId.updateAndGet(v -> newMessageId());
-                                    emitter.next( new TextMessageStartEvent(
+                                    emitter.next(new TextMessageStartEvent(
                                             messageId,
                                             Role.ASSISTANT,
                                             System.currentTimeMillis(),
-                                            null) );
+                                            null));
                                     //continue;
                                     return;
                                 }
@@ -124,39 +126,13 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
 
                             log.trace("COMPLETE:\n{}", result);
 
-                            if (result.isInterruptionMetadata()) {
+                            final var output = onCompletion(input, result);
+                            nodeOutputToEvents(input, output).forEach(emitter::next);
 
-                                final var interruptionMetadata = result.asInterruptionMetadata();
-
-                                log.trace("INTERRUPTION DETECTED: {}", interruptionMetadata);
-
-                                graphByThread.put(input.threadId(), graphData.withInterruption(true));
-
-                                final var output = onInterruption(input, interruptionMetadata);
-
-                                nodeOutputToEvents(input, output).forEach(emitter::next);
-
-                            } else {
-                                graphByThread.put(input.threadId(), graphData.withInterruption(false));
-
-                                // Thread CleanUp
-                                //graphByThread.remove(input.threadId());
-                                //var tag = saver.release( runnableConfig );
-                                //log.debug( "thread '{}' released", tag.threadId() );
-
-                                emitter.next(new RunFinishedEvent(
-                                        input.threadId(),
-                                        input.runId(),
-                                        new SuccessOutcome(),
-                                        null,
-                                        System.currentTimeMillis(),
-                                        null));
-
-                            }
                         }).whenComplete((ignored, throwable) -> {
                             if (throwable != null) {
                                 log.error("Error during graph execution", throwable);
-                                if( agent.compileConfig.checkpointSaver().isPresent() ) {
+                                if (agent.compileConfig.checkpointSaver().isPresent()) {
                                     try {
                                         agent.compileConfig.checkpointSaver().get().releaseOnError(runnableConfig, new Exception(throwable));
                                     } catch (Exception e) {
@@ -182,6 +158,7 @@ public abstract class AGUIAbstractLangGraphAgent implements LG4JLoggable {
                                     null)
                     )
                     .concatWith(outputFlux.subscribeOn(Schedulers.immediate()));
+
 
         } catch (Exception e) {
             return Flux.error(e);
