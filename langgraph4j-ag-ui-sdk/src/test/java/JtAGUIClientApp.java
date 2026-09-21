@@ -7,8 +7,8 @@
 //DEPS org.springframework.ai:spring-ai-ollama
 //DEPS org.springframework.ai:spring-ai-google-genai
 ///DEPS org.springframework.ai:spring-ai-azure-openai
-//DEPS org.bsc.langgraph4j:langgraph4j-ag-ui-json:0.1.0
-//DEPS com.ag-ui.community:java-client:0.1.0
+//DEPS org.bsc.langgraph4j:langgraph4j-ag-ui-json:0.2.0
+//DEPS com.ag-ui.community:java-client:0.1.1
 
 import com.agui.community.client.HttpAgent;
 import com.agui.community.core.agent.RunAgentInput;
