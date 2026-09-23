@@ -2,6 +2,62 @@
 
 
 
+<!-- "name: v0.2.1" is a release tag -->
+
+## [v0.2.1](https://github.com/bsorrentino/langgraph4j/releases/tag/v0.2.1) (2026-09-23)
+
+### Features
+
+ *  add new maven module for spring boot implementation ([bf37f72dce005fa](https://github.com/bsorrentino/langgraph4j/commit/bf37f72dce005fa38a890c9e13ecc6d055871ef1))
+   
+ *  refactor AGUISSEController to use AGUIAgentRegistry for agent management ([160e764d83a22d0](https://github.com/bsorrentino/langgraph4j/commit/160e764d83a22d06dae36252a7fadb5b6a5db7b4))
+   
+ *  add AGUIAgentRegistry class for managing agent instances ([bb11c82e90925e9](https://github.com/bsorrentino/langgraph4j/commit/bb11c82e90925e97c49556074e6e0abcfce1d4a7))
+   
+ *  implement AGUIAgentBase class to provide an agent baseline implementation ([b32882891a1f3da](https://github.com/bsorrentino/langgraph4j/commit/b32882891a1f3da3646ac2ba730e3238887cc384))
+   
+ *  add AGUIAgent interface for running agent ([5258f6ef1081a0b](https://github.com/bsorrentino/langgraph4j/commit/5258f6ef1081a0b5bb352b0fe6aa321724ff6f17))
+   
+
+
+### Documentation
+
+ -  update changelog ([8503ecf10c0c2e2](https://github.com/bsorrentino/langgraph4j/commit/8503ecf10c0c2e2a46e75b18ff95b0bde7a58d1f))
+
+
+### Refactor
+
+ -  **webui**  update agentId in SimpleChatHITL to 'HITL' for consistency ([ae75ff9e932f9d0](https://github.com/bsorrentino/langgraph4j/commit/ae75ff9e932f9d045a619bcee4ea489378adbc9e))
+   
+ -  **webui**  update agentId to use 'INTERRUPT' for consistency ([1c004a3a6a6520f](https://github.com/bsorrentino/langgraph4j/commit/1c004a3a6a6520f562de10a2e99e5143ac039bc6))
+   
+ -  **copilotkit**  update agent initialization to use named agents 'INTERRUPT' and 'HITL' ([4874747eea36218](https://github.com/bsorrentino/langgraph4j/commit/4874747eea36218aaf80f08ca3f180a5e72e158d))
+   
+ -  **copilotkit**  update createDefaultAgent to accept agentId and adjust URL structure ([969b453ab73f3ec](https://github.com/bsorrentino/langgraph4j/commit/969b453ab73f3ec6179ec4b22938b36e6074815a))
+   
+ -  change Builder methods addEvent()/addEvents() to public visibility ([64b0f461d215460](https://github.com/bsorrentino/langgraph4j/commit/64b0f461d2154605674cb2e73544f06bde34b6b8))
+   
+
+### ALM 
+
+ -  bump to next version 0.2.1 ([63f4aac80a32556](https://github.com/bsorrentino/langgraph4j/commit/63f4aac80a3255619fa27cb73f16b633f6458857))
+   
+ -  update jackson-databind version to 2.21.4 ([3fb53b12673ca50](https://github.com/bsorrentino/langgraph4j/commit/3fb53b12673ca50fe816ce2f4952720a79605edf))
+   
+ -  bump to next dev version 0.2-SNAPSHOT ([386f487dfc62bbc](https://github.com/bsorrentino/langgraph4j/commit/386f487dfc62bbc986c939f5199b4e5f72760474))
+   
+
+### Test 
+
+ -  spring boot application that runs HITL and interruptable agents ([bbef7b68d2918fe](https://github.com/bsorrentino/langgraph4j/commit/bbef7b68d2918fe41659bc5f325ad139769e24a3))
+   
+ -  **javelit**  update langgraph4j and java-client dependencies to latest versions ([c19a4b98b7f4bfa](https://github.com/bsorrentino/langgraph4j/commit/c19a4b98b7f4bfa5e6ac7d9b53d03b1a02bf1ade))
+   
+
+
+
+
+
 <!-- "name: v0.2.0" is a release tag -->
 
 ## [v0.2.0](https://github.com/bsorrentino/langgraph4j/releases/tag/v0.2.0) (2026-09-20)
