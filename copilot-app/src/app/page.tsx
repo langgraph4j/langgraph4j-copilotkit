@@ -1,6 +1,6 @@
 "use client";
 
-import { SimpleChatINTERRUPT } from "./component/chatINTERRUPT";
+import { SimpleChatINTERRUPT } from "./component/chatInterrupt";
 
 //import styles from "./page.module.css";
 
