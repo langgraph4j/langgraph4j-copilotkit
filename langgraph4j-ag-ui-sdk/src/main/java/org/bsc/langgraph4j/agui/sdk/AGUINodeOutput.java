@@ -17,12 +17,12 @@ public class AGUINodeOutput<State extends AgentState> extends NodeOutput<State> 
         protected List<Event> events = new ArrayList<>();
 
 
-        Builder addEvent(Event event) {
+        public Builder addEvent(Event event) {
             events.add(event);
             return this;
         }
 
-        Builder addEvents(Event ...event) {
+        public Builder addEvents(Event ...event) {
             events.addAll(List.of(event));
             return this;
         }

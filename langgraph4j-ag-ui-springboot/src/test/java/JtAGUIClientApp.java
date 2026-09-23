@@ -1,14 +1,8 @@
-//DEPS org.bsc.langgraph4j:langgraph4j-javelit:1.9.0-beta6
-//DEPS org.bsc.langgraph4j:langgraph4j-ag-ui-sdk:0.1.0
-/// DEPS net.sourceforge.plantuml:plantuml-mit:1.2025.10
-//DEPS org.springframework.ai:spring-ai-bom:2.0.0@pom
-//DEPS org.springframework.ai:spring-ai-client-chat
-//DEPS org.springframework.ai:spring-ai-openai
-//DEPS org.springframework.ai:spring-ai-ollama
-//DEPS org.springframework.ai:spring-ai-google-genai
-///DEPS org.springframework.ai:spring-ai-azure-openai
-//DEPS org.bsc.langgraph4j:langgraph4j-ag-ui-json:0.1.0
-//DEPS com.ag-ui.community:java-client:0.1.0
+//DEPS com.fasterxml.jackson.core:jackson-annotations:2.21
+//DEPS org.bsc.langgraph4j:langgraph4j-javelit:1.9.0
+//DEPS org.bsc.langgraph4j:langgraph4j-ag-ui-json:0.2.1
+//DEPS com.ag-ui.community:java-client:0.1.1
+//DEPS io.javelit:javelit:0.89.0
 
 import com.agui.community.client.HttpAgent;
 import com.agui.community.core.agent.RunAgentInput;
@@ -16,6 +10,7 @@ import com.agui.community.core.event.Event;
 import com.agui.community.core.message.UserMessage;
 import com.agui.json.AGUIJacksonSerializer;
 import io.javelit.core.Jt;
+import io.javelit.core.Server;
 import org.bsc.javelit.JtSpinner;
 import org.bsc.langgraph4j.*;
 
@@ -71,11 +66,17 @@ public class JtAGUIClientApp {
 
         var app = new JtAGUIClientApp();
 
-        app.view();
+        app.startServer();
+    }
+    void startServer() {
+        // prepare a Javelit server
+        var server = Server.builder(this::app, 8888).build();
+
+        // start the server - this is non-blocking, user thread
+        server.start();
     }
 
-
-    public void view() {
+    public void app() {
         Jt.title("LangGraph4J AG UI Client").use();
         Jt.markdown("### Powered by LangGraph4j and SpringAI").use();
 

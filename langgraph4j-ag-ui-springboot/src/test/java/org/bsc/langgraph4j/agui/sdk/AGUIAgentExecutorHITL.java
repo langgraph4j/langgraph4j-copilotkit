@@ -1,12 +1,7 @@
 package org.bsc.langgraph4j.agui.sdk;
 
 import com.agui.community.core.agent.RunAgentInput;
-import com.agui.community.core.event.JsonPatchOperation;
-import com.agui.community.core.event.RunFinishedEvent;
-import com.agui.community.core.event.StateDeltaEvent;
-import com.agui.community.core.event.ToolCallChunkEvent;
-import com.agui.community.core.interrupt.Interrupt;
-import com.agui.community.core.interrupt.InterruptOutcome;
+import com.agui.community.core.event.*;
 import com.agui.community.core.interrupt.SuccessOutcome;
 import org.bsc.langgraph4j.*;
 import org.bsc.langgraph4j.action.InterruptionMetadata;
@@ -19,20 +14,21 @@ import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
 
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static org.bsc.langgraph4j.GraphDefinition.END;
 import static org.bsc.langgraph4j.utils.CollectionsUtils.lastOf;
 
-public class AGUIAgentExecutorINTERRUPT extends AGUIAbstractLangGraphAgent {
+public class AGUIAgentExecutorHITL extends AGUIAgentBase {
 
     private final MemorySaver saver = new MemorySaver();
 
-    @Override
-    protected CompiledGraph<? extends AgentState> buildStateGraph() throws GraphStateException {
+    public AGUIAgentExecutorHITL(String id) {
+        super(id);
+    }
 
+    @Override
+    protected CompiledGraph<? extends AgentState> newGraph() throws Exception {
         var agent = AgentExecutorEx.builder()
                 .chatModel(AiModel.OLLAMA.chatModel("qwen3.5"))
                 .emitStreamingEnd(true)
@@ -55,43 +51,28 @@ public class AGUIAgentExecutorINTERRUPT extends AGUIAbstractLangGraphAgent {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    protected GraphInput buildGraphInput(RunAgentInput input) {
-
-        if( !input.resume().isEmpty() ) {
-
-            if( input.resume().size() > 1 ) {
-                throw new IllegalStateException("resume more than one message");
-            }
-            final var resume = input.resume().get(0);
-
-            final var payload = (Map<String,Object>)resume.payload();
-
-            final var approvalResult = payload.get(AgentEx.APPROVAL_RESULT);
-
-            return GraphInput.resume(Map.of(AgentEx.APPROVAL_RESULT, approvalResult));
-
-        }
-
+    protected GraphInput graphInput(RunAgentInput input) {
         var lastUserMessage = lastOf(input.messages())
                 .map(com.agui.community.core.message.Message::content)
                 .orElseThrow(() -> new IllegalStateException("last user message not found"));
 
         log.debug("LAST USER MESSAGE: {}", lastUserMessage);
 
+        if (input.state() instanceof Map<?, ?> state && Boolean.TRUE.equals(state.get("resume"))) {
+            return GraphInput.resume(Map.of(AgentEx.APPROVAL_RESULT, lastUserMessage));
+        }
+
         return GraphInput.args(Map.of("messages", new UserMessage(lastUserMessage)));
     }
 
     @Override
-    protected <S extends AgentState> AGUINodeOutput<S> onCompletion(RunAgentInput input, GraphResult result) {
+    protected Collection<? extends Event> onCompleteEvents(RunAgentInput input, GraphResult result) {
 
-        final var outputBuilder = AGUINodeOutput.<S>builder();
-
-        final var agent = this.<S>currentGraph(input).orElseThrow(() -> new IllegalStateException("current graph not found"));
+        final var outputBuilder = AGUINodeOutput.builder();
 
         if (result.isInterruptionMetadata()) {
 
-            final var interruptionMetadata = result.<S>asInterruptionMetadata();
+            final var interruptionMetadata = result.asInterruptionMetadata();
 
             log.trace("INTERRUPTION DETECTED: {}", interruptionMetadata);
 
@@ -99,12 +80,12 @@ public class AGUIAgentExecutorINTERRUPT extends AGUIAbstractLangGraphAgent {
                     .orElseThrow(() -> new IllegalStateException("messages not found into given state"));
 
 
-            var interrupts = lastOf(messages)
+            lastOf(messages)
                     .flatMap(MessageUtil::asAssistantMessage)
                     .filter(AssistantMessage::hasToolCalls)
                     .map(AssistantMessage::getToolCalls)
-                    .map(toolCalls ->
-                            toolCalls.stream().map(toolCall -> {
+                    .ifPresent(toolCalls ->
+                            toolCalls.forEach(toolCall -> {
                                 var toolCallId = toolCall.id().isBlank() ?
                                         UUID.randomUUID().toString() :
                                         toolCall.id();
@@ -117,26 +98,12 @@ public class AGUIAgentExecutorINTERRUPT extends AGUIAbstractLangGraphAgent {
                                         System.currentTimeMillis(),
                                         null
                                 ));
-                                return new Interrupt("int-1",
-                                        interruptionMetadata.reason().orElse(""),
-                                        "",
-                                        toolCallId,
-                                        null,
-                                        null,
-                                        Map.of("to", "", "subject", "", "body", ""));
-                            }).toList());
-            return outputBuilder
-                    .addEvent(new RunFinishedEvent(
-                            input.threadId(),
-                            input.runId(),
-                            new InterruptOutcome(interrupts.orElseGet(List::of)),
-                            null,
+                            }));
+            final var output = outputBuilder
+                    .addEvent(new StateDeltaEvent(
+                            List.of(new JsonPatchOperation("add", "/resume", true)),
                             System.currentTimeMillis(),
                             null))
-                    .build(interruptionMetadata.nodeId(), interruptionMetadata.state());
-        }
-        else {
-            return outputBuilder
                     .addEvent(new RunFinishedEvent(
                             input.threadId(),
                             input.runId(),
@@ -144,8 +111,28 @@ public class AGUIAgentExecutorINTERRUPT extends AGUIAbstractLangGraphAgent {
                             null,
                             System.currentTimeMillis(),
                             null))
-                    .build(END, agent.stateGraph.getStateFactory().apply( result.asStateDataOrLastCheckpointStateData() ));
+                    .build(interruptionMetadata.nodeId(), interruptionMetadata.state());
+            return output.events();
         }
+
+            final var output =  outputBuilder
+                    .addEvent(new StateDeltaEvent(
+                            List.of(
+                                new JsonPatchOperation("add", "/resume", false),
+                                new JsonPatchOperation( "remove", "/resume", null )
+                            ),
+                            System.currentTimeMillis(),
+                            null))
+                    .addEvent(new RunFinishedEvent(
+                            input.threadId(),
+                            input.runId(),
+                            new SuccessOutcome(),
+                            null,
+                            System.currentTimeMillis(),
+                            null))
+                    .build(END, graph.stateFactory().apply( result.asStateDataOrLastCheckpointStateData() ));
+            return output.events();
+
 
     }
 }

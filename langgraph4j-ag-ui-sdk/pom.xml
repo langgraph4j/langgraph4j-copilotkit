@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.bsc.langgraph4j</groupId>
 		<artifactId>langgraph4j-ag-ui-parent</artifactId>
-		<version>0.2.0</version>
+		<version>0.2.1</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -25,39 +25,6 @@
 			<email>bartolomeo.sorrentino@gmail.com</email>
 		</developer>
 	</developers>
-
-	<properties>
-		<spring-ai.version>2.0.0</spring-ai.version>
-	</properties>
-
-	<dependencyManagement>
-		<dependencies>
-
-			<dependency>
-				<groupId>org.springframework.ai</groupId>
-				<artifactId>spring-ai-bom</artifactId>
-				<version>${spring-ai.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-
-			<dependency>
-				<groupId>org.springframework</groupId>
-				<artifactId>spring-framework-bom</artifactId>
-				<version>7.0.8</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-
-			<dependency>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-starter-parent</artifactId>
-				<version>4.1.0</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 
 	<dependencies>
 
@@ -80,151 +47,20 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.bsc.langgraph4j</groupId>
-			<artifactId>langgraph4j-ag-ui-json</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-
-		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>io.projectreactor</groupId>
-			<artifactId>reactor-core</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
-
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-context</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-webmvc</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
-		<!--
-		================================================
-		TEST
-		================================================
-		-->
-		<dependency>
-			<groupId>org.bsc.langgraph4j</groupId>
-			<artifactId>langgraph4j-javelit</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<!--
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-webflux</artifactId>
-			<scope>test</scope>
-		</dependency>
-		-->
-
-		<dependency>
-			<groupId>org.springframework.ai</groupId>
-			<artifactId>spring-ai-commons</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.ai</groupId>
-			<artifactId>spring-ai-model</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.ai</groupId>
-			<artifactId>spring-ai-client-chat</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.ai</groupId>
-			<artifactId>spring-ai-ollama</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.ai</groupId>
-			<artifactId>spring-ai-openai</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.bsc.langgraph4j</groupId>
-			<artifactId>langgraph4j-spring-ai</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.bsc.langgraph4j</groupId>
-			<artifactId>langgraph4j-springai-agentexecutor</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>com.ag-ui.community</groupId>
-			<artifactId>java-client</artifactId>
-			<version>${ag-ui.version}</version>
-			<scope>test</scope>
+			<groupId>org.jspecify</groupId>
+			<artifactId>jspecify</artifactId>
+			<version>1.0.0</version>
 		</dependency>
 
 	</dependencies>
 
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<parameters>true</parameters>
-					<testExcludes>
-						<testExclude>**/Jt*</testExclude>
-					</testExcludes>
-				</configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
 		</plugins>
 	</build>
-
-	<profiles>
-<!--
-		<profile>
-			<id>macos-dns-native</id>
-			<activation>
-				<os>
-					<family>mac</family>
-					<arch>aarch64</arch>
-				</os>
-			</activation>
-			<dependencies>
-				<dependency>
-					<groupId>io.netty</groupId>
-					<artifactId>netty-resolver-dns-native-macos</artifactId>
-					<version>4.1.115.Final</version>
-					<classifier>osx-aarch_64</classifier>
-					<scope>runtime</scope>
-				</dependency>
-			</dependencies>
-		</profile>
--->
-	</profiles>
-
 </project>

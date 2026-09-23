@@ -6,7 +6,7 @@
 
     <groupId>org.bsc.langgraph4j</groupId>
     <artifactId>langgraph4j-ag-ui-parent</artifactId>
-    <version>0.2.0</version>
+    <version>0.2.1</version>
     <packaging>pom</packaging>
 
     <name>langgraph4j::ag-ui::parent</name>
@@ -60,6 +60,11 @@
                 <scope>import</scope>
             </dependency>
 
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>2.21.4</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -88,6 +93,7 @@
 
     <modules>
         <module>langgraph4j-ag-ui-sdk</module>
+        <module>langgraph4j-ag-ui-springboot</module>
         <module>langgraph4j-ag-ui-json</module>
     </modules>
 
@@ -97,6 +103,7 @@
             <modules>
                 <module>ag-ui/sdks/community/java/ag-ui</module>
                 <module>langgraph4j-ag-ui-sdk</module>
+                <module>langgraph4j-ag-ui-springboot</module>
                 <module>langgraph4j-ag-ui-json</module>
             </modules>
         </profile>

@@ -1,10 +1,10 @@
 import { HttpAgent } from "@ag-ui/client"
 
-const HTTP_URL = process.env.HTTP_URL || "http://localhost:8081/sse/default";
+const HTTP_URL = process.env.HTTP_URL || "http://localhost:8081/sse";
 
-export function createDefaultAgent(): HttpAgent {
+export function createDefaultAgent(agentId: string): HttpAgent {
   return new HttpAgent({
-    url: HTTP_URL,
+    url: `${HTTP_URL}/${agentId}`,
     initialState: {
       'language': 'NL'
     },

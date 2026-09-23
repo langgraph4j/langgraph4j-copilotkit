@@ -7,6 +7,7 @@ import { EmailApprovalCard } from "./emailApprovalCard";
 export function SimpleChatINTERRUPT() {
 
   useInterrupt({
+    agentId: "INTERRUPT",
     render: ({ interrupt, resolve }) => {
       // where these fields live depends on what your backend puts on the interrupt
       const { to, subject, body } = (interrupt?.metadata ?? {}) as {
@@ -27,5 +28,5 @@ export function SimpleChatINTERRUPT() {
     },
   });
 
-  return <CopilotChat agentId="default" className="h-full" />;
+  return <CopilotChat agentId="INTERRUPT" className="h-full" />;
 }
