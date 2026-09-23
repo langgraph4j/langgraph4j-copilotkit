@@ -4,7 +4,13 @@
 [![Static Badge](https://img.shields.io/badge/maven--snapshots-0.0.2--SNAPSHOT-blue)][snapshots] [![Maven Central](https://img.shields.io/maven-central/v/org.bsc.langgraph4j/langgraph4j-copilotkit.svg)][releases]
 -->
 
+
+### ‼️ **This has been archived because it has been merged into [LangGraph4j] main project from version `1.9.1` .** ‼️
+
+
 # LangGraph4j support for CopilotKit
+
+
 
 Make [LangGraph4j] compliant with [AG-UI protocol][AG-UI] with [CopilotKit] integration
 
