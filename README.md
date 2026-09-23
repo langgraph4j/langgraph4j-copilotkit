@@ -5,7 +5,7 @@
 -->
 
 
-### ‼️ **This has been archived because it has been merged into [LangGraph4j] main project from version `1.9.1` .** ‼️
+### ‼️ **ARCHIVED because it has been merged into [LangGraph4j] main project from version `1.9.1` .** ‼️
 
 
 # LangGraph4j support for CopilotKit
