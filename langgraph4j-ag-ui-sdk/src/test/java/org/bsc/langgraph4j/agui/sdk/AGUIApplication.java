@@ -8,10 +8,11 @@ import org.springframework.context.annotation.Bean;
 public class AGUIApplication {
 
     @Bean
-    AGUIAbstractLangGraphAgent createAgentExecutor() {
+    AGUIAgentRegistry createAgentExecutor() {
 
-        return new AGUIAgentExecutorINTERRUPT();
-        //return new AGUIAgentExecutorHITL();
+        return new AGUIAgentRegistry(
+                new AGUIAgentExecutorINTERRUPT("INTERRUPT"),
+                new AGUIAgentExecutorHITL("HITL"));
     }
 
     public static void main(String[] args) {

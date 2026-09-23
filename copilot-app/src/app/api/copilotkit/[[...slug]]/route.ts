@@ -5,11 +5,10 @@ import { handle } from "hono/vercel";
 
 
 
-const httpAgent = createDefaultAgent();
-
 const runtime = new CopilotRuntime({
   agents: {
-      'default': httpAgent
+      'INTERRUPT': createDefaultAgent('INTERRUPT'),
+      'HITL': createDefaultAgent('HITL'),
   }
 });
 

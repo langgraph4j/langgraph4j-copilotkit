@@ -19,13 +19,16 @@ import java.util.*;
 import static org.bsc.langgraph4j.GraphDefinition.END;
 import static org.bsc.langgraph4j.utils.CollectionsUtils.lastOf;
 
-public class AGUIAgentExecutorHITL extends AGUIAbstractLangGraphAgent {
+public class AGUIAgentExecutorHITL extends AGUIAgentBase {
 
     private final MemorySaver saver = new MemorySaver();
 
-    @Override
-    protected CompiledGraph<? extends AgentState> buildStateGraph() throws GraphStateException {
+    public AGUIAgentExecutorHITL(String id) {
+        super(id);
+    }
 
+    @Override
+    protected CompiledGraph<? extends AgentState> newGraph() throws Exception {
         var agent = AgentExecutorEx.builder()
                 .chatModel(AiModel.OLLAMA.chatModel("qwen3.5"))
                 .emitStreamingEnd(true)
@@ -48,7 +51,7 @@ public class AGUIAgentExecutorHITL extends AGUIAbstractLangGraphAgent {
     }
 
     @Override
-    protected GraphInput buildGraphInput(RunAgentInput input) {
+    protected GraphInput graphInput(RunAgentInput input) {
         var lastUserMessage = lastOf(input.messages())
                 .map(com.agui.community.core.message.Message::content)
                 .orElseThrow(() -> new IllegalStateException("last user message not found"));
@@ -63,15 +66,13 @@ public class AGUIAgentExecutorHITL extends AGUIAbstractLangGraphAgent {
     }
 
     @Override
-    protected <S extends AgentState> AGUINodeOutput<S> onCompletion(RunAgentInput input, GraphResult result) {
+    protected Collection<? extends Event> onCompleteEvents(RunAgentInput input, GraphResult result) {
 
-        final var outputBuilder = AGUINodeOutput.<S>builder();
-
-        final var agent = this.<S>currentGraph(input).orElseThrow(() -> new IllegalStateException("current graph not found"));
+        final var outputBuilder = AGUINodeOutput.builder();
 
         if (result.isInterruptionMetadata()) {
 
-            final var interruptionMetadata = result.<S>asInterruptionMetadata();
+            final var interruptionMetadata = result.asInterruptionMetadata();
 
             log.trace("INTERRUPTION DETECTED: {}", interruptionMetadata);
 
@@ -98,7 +99,7 @@ public class AGUIAgentExecutorHITL extends AGUIAbstractLangGraphAgent {
                                         null
                                 ));
                             }));
-            return outputBuilder
+            final var output = outputBuilder
                     .addEvent(new StateDeltaEvent(
                             List.of(new JsonPatchOperation("add", "/resume", true)),
                             System.currentTimeMillis(),
@@ -111,9 +112,10 @@ public class AGUIAgentExecutorHITL extends AGUIAbstractLangGraphAgent {
                             System.currentTimeMillis(),
                             null))
                     .build(interruptionMetadata.nodeId(), interruptionMetadata.state());
+            return output.events();
         }
-        else {
-            return outputBuilder
+
+            final var output =  outputBuilder
                     .addEvent(new StateDeltaEvent(
                             List.of(
                                 new JsonPatchOperation("add", "/resume", false),
@@ -128,8 +130,9 @@ public class AGUIAgentExecutorHITL extends AGUIAbstractLangGraphAgent {
                             null,
                             System.currentTimeMillis(),
                             null))
-                    .build(END, agent.stateGraph.getStateFactory().apply( result.asStateDataOrLastCheckpointStateData() ));
-        }
+                    .build(END, graph.stateFactory().apply( result.asStateDataOrLastCheckpointStateData() ));
+            return output.events();
+
 
     }
 }

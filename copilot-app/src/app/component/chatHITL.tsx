@@ -7,7 +7,7 @@ import { EmailApprovalCard } from "./emailApprovalCard";
 
 export function SimpleChatHITL() {
   useHumanInTheLoop({
-    agentId: "default",
+    agentId: "HITL",
     name: "sendEmail",
     description: "Ask the user to approve sending an email.",
     parameters: z.object({
@@ -28,5 +28,5 @@ export function SimpleChatHITL() {
     ),
   });
 
-  return <CopilotChat agentId="default" className="h-full" />;
+  return <CopilotChat agentId="HITL" className="h-full" />;
 }
