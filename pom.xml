@@ -93,6 +93,7 @@
 
     <modules>
         <module>langgraph4j-ag-ui-sdk</module>
+        <module>langgraph4j-ag-ui-springboot</module>
         <module>langgraph4j-ag-ui-json</module>
     </modules>
 
@@ -102,6 +103,7 @@
             <modules>
                 <module>ag-ui/sdks/community/java/ag-ui</module>
                 <module>langgraph4j-ag-ui-sdk</module>
+                <module>langgraph4j-ag-ui-springboot</module>
                 <module>langgraph4j-ag-ui-json</module>
             </modules>
         </profile>

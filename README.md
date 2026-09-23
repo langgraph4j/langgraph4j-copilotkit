@@ -68,7 +68,7 @@ mvn clean install -Dgpg.skip -Dmaven.javadoc.skip -Plocal
 
 ### Start LangGraph4j Agent
 ```bash
-mvn package spring-boot:test-run -pl langgraph4j-ag-ui-sdk
+mvn package spring-boot:test-run -pl langgraph4j-ag-ui-springboot
 ```
 
 ### Start CopilotKit App
