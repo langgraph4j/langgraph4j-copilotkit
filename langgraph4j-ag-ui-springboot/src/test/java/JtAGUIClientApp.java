@@ -1,6 +1,6 @@
 //DEPS com.fasterxml.jackson.core:jackson-annotations:2.21
 //DEPS org.bsc.langgraph4j:langgraph4j-javelit:1.9.0
-//DEPS org.bsc.langgraph4j:langgraph4j-ag-ui-json:0.2-SNAPSHOT
+//DEPS org.bsc.langgraph4j:langgraph4j-ag-ui-json:0.2.1
 //DEPS com.ag-ui.community:java-client:0.1.1
 //DEPS io.javelit:javelit:0.89.0
 
